@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FDE MVP · 实习管理与教学改进</title>
+<style>
+:root{--bg:#f5f7fa;--card:#fff;--line:#e5e9f0;--txt:#1f2937;--sub:#6b7280;--pri:#2563eb;--ok:#16a34a;--warn:#d97706;--bad:#dc2626;--chip:#eef2ff}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Microsoft YaHei","PingFang SC",sans-serif;background:var(--bg);color:var(--txt);font-size:14px}
+header{background:var(--card);border-bottom:1px solid var(--line);padding:12px 24px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:10}
+header h1{font-size:17px}
+header .who{margin-left:auto;display:flex;align-items:center;gap:10px;color:var(--sub)}
+.badge{background:var(--chip);color:var(--pri);padding:2px 10px;border-radius:10px;font-size:12px}
+nav{display:flex;gap:4px;padding:10px 24px;background:var(--card);border-bottom:1px solid var(--line);overflow-x:auto}
+nav button{border:none;background:none;padding:8px 14px;border-radius:8px;cursor:pointer;font-size:14px;color:var(--sub)}
+nav button.on{background:var(--pri);color:#fff}
+main{padding:20px 24px;max-width:1200px;margin:0 auto}
+.grid{display:grid;gap:14px}
+.g5{grid-template-columns:repeat(5,1fr)}
+.g2{grid-template-columns:1fr 1fr}
+@media(max-width:900px){.g5{grid-template-columns:repeat(2,1fr)}.g2{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
+.card h3{font-size:14px;color:var(--sub);margin-bottom:8px;font-weight:600}
+.metric .v{font-size:26px;font-weight:700}
+.metric .t{font-size:12px;color:var(--sub);margin-top:4px}
+.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:7px 9px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{color:var(--sub);font-weight:600;background:#fafbfd}
+.tag{display:inline-block;padding:1px 8px;border-radius:8px;font-size:12px;margin:1px 2px}
+.t-ok{background:#dcfce7;color:#15803d}.t-warn{background:#fef3c7;color:#b45309}.t-bad{background:#fee2e2;color:#b91c1c}.t-info{background:#dbeafe;color:#1d4ed8}.t-gray{background:#f3f4f6;color:#6b7280}
+button.act{background:var(--pri);color:#fff;border:none;padding:6px 12px;border-radius:8px;cursor:pointer;font-size:13px}
+button.act.ghost{background:#fff;color:var(--pri);border:1px solid var(--pri)}
+button.act:disabled{opacity:.5;cursor:not-allowed}
+input,textarea,select{border:1px solid var(--line);border-radius:8px;padding:8px;font-size:13px;font-family:inherit;width:100%}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.row>div{flex:1;min-width:120px}
+.login-wrap{max-width:380px;margin:12vh auto}
+.login-wrap .card{padding:28px}
+.muted{color:var(--sub);font-size:12px}
+.cite{background:#f8fafc;border-left:3px solid var(--pri);padding:6px 10px;margin:6px 0;font-size:12px;color:#334155}
+.pass{color:var(--ok);font-weight:600}.fail{color:var(--bad);font-weight:600}
+.sec{margin-bottom:18px}
+pre{white-space:pre-wrap;font-size:12px;background:#f8fafc;padding:10px;border-radius:8px}
+.hidden{display:none}
+#toast{position:fixed;bottom:20px;right:20px;background:#111827;color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;opacity:0;transition:.3s;z-index:99}
+</style>
+</head>
+<body>
+
+<div id="loginView" class="login-wrap">
+  <div class="card">
+    <h2 style="margin-bottom:4px">FDE MVP · 实习管理与教学改进</h2>
+    <p class="muted" style="margin-bottom:16px">知行职业学院 · 机电专业试点（合成训练案例）</p>
+    <div class="sec"><input id="lu" placeholder="用户名" value="admin"></div>
+    <div class="sec"><input id="lp" type="password" placeholder="密码" value="admin123"></div>
+    <button class="act" style="width:100%" onclick="doLogin()">登 录</button>
+    <div id="loginErr" class="muted" style="color:var(--bad);margin-top:10px"></div>
+    <details style="margin-top:14px"><summary class="muted">演示账号（分层权限）</summary>
+      <pre>admin / admin123   SaaS管理员（用户·口径·审计全量）
+tangyj / tang123   教务管理员（改派·签核·汇总）
+linyz / lin123     指导教师（复核N1）
+yesh / ye123       企业导师·恒晟精工（仅本企业）
+yesh2 / ye456      企业导师·甬泰机电
+fujing / fu123     风险合规（审计全量·抽检）</pre>
+    </details>
+  </div>
+</div>
+
+<div id="appView" class="hidden">
+  <header>
+    <h1>FDE MVP · 实习管理与教学改进</h1>
+    <span class="badge" id="roleBadge"></span>
+    <div class="who"><span id="whoName"></span><button class="act ghost" onclick="logout()">退出</button></div>
+  </header>
+  <nav id="nav">
+    <button data-v="ov" class="on">总览</button>
+    <button data-v="fb">反馈归集</button>
+    <button data-v="ch">变更同步</button>
+    <button data-v="sg">建议复核</button>
+    <button data-v="kb">知识库</button>
+    <button data-v="hs">测试台 Harness</button>
+    <button data-v="au">审计</button>
+    <button data-v="ad" id="tabAdmin">管理</button>
+  </nav>
+  <main>
+    <section id="vOv"></section>
+    <section id="vFb" class="hidden"></section>
+    <section id="vCh" class="hidden"></section>
+    <section id="vSg" class="hidden"></section>
+    <section id="vKb" class="hidden"></section>
+    <section id="vHs" class="hidden"></section>
+    <section id="vAu" class="hidden"></section>
+    <section id="vAd" class="hidden"></section>
+  </main>
+</div>
+<div id="toast"></div>
+
+<script>
+let ME=null, HARNESS=null;
+
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.style.opacity=1;setTimeout(()=>t.style.opacity=0,2200)}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+async function api(path,opts={}){
+  opts.headers=Object.assign({'Content-Type':'application/json'},ME?{'Authorization':'Bearer '+ME.token}:{});
+  if(opts.body && typeof opts.body !== 'string')opts.body=JSON.stringify(opts.body);
+  const r=await fetch(path,opts);
+  if(r.status===401){logout();throw new Error('未登录')}
+  const d=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error((d&&d.detail)||('HTTP '+r.status));
+  return d;
+}
+
+/* ---- 登录 ---- */
+async function doLogin(){
+  try{
+    const r=await api('/api/login',{method:'POST',body:{username:lu.value,password:lp.value}});
+    ME=r;localStorage.setItem('fde_mvp',JSON.stringify(r));enter();
+  }catch(e){document.getElementById('loginErr').textContent=e.message}
+}
+function logout(){ME=null;localStorage.removeItem('fde_mvp');location.reload()}
+function enter(){
+  loginView.classList.add('hidden');appView.classList.remove('hidden');
+  whoName.textContent=ME.display;roleBadge.textContent=ME.roleName;
+  document.getElementById('tabAdmin').style.display=ME.role==='admin'?'':'none';
+  nav.querySelectorAll('button').forEach(b=>b.onclick=()=>switchTab(b.dataset.v));
+  switchTab('ov');
+}
+if(localStorage.getItem('fde_mvp')){try{ME=JSON.parse(localStorage.getItem('fde_mvp'));enter()}catch(e){}}
+
+function switchTab(v){
+  nav.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
+  for(const s of document.querySelectorAll('main section'))s.classList.add('hidden');
+  const IDS={ov:'vOv',fb:'vFb',ch:'vCh',sg:'vSg',kb:'vKb',hs:'vHs',au:'vAu',ad:'vAd'};document.getElementById(IDS[v]).classList.remove('hidden');
+  ({ov:renderOv,fb:renderFb,ch:renderCh,sg:renderSg,kb:renderKb,hs:renderHs,au:renderAu,ad:renderAd}[v])();
+}
+
+/* ---- 总览 ---- */
+async function renderOv(){
+  const m=await api('/api/overview');
+  const fmt=(x,tgt,inv)=>{const good=inv?x>=tgt:x<=tgt;return `<span class="${good?'ok':'bad'}">${typeof x==='number'&&x<10?x.toFixed(2):x}</span>`};
+  vOv.innerHTML=`
+  <div class="grid g5 sec">
+    ${['M1','M2','M3','M4','M5'].map(k=>{const x=m[k];return `
+      <div class="card metric"><h3>${k} · ${esc(x.label)}</h3>
+      <div class="v">${k==='M2'?esc(x.value)+'<span class="muted" style="font-size:14px"> / '+x.target+'</span>':fmt(x.value,x.target,k==='M1')}</div>
+      <div class="t">${esc(x.detail)}　目标：${x.target}</div></div>`}).join('')}
+  </div>
+  <div class="grid g2">
+    <div class="card"><h3>处理队列</h3><table>
+      <tr><td>低置信转人工（教育-032）</td><td><span class="tag t-warn">${m.queues.humanQueue} 条</span></td></tr>
+      <tr><td>证据不足待补写（E2）</td><td><span class="tag t-bad">${m.queues.insufficient} 条</span></td></tr>
+      <tr><td>未同步变更（E1）</td><td><span class="tag t-warn">${m.counts.unsynced} 条</span></td></tr>
+      <tr><td>三元组 / 建议</td><td>${m.counts.triples} / ${m.counts.suggestions} 条</td></tr>
+    </table></div>
+    <div class="card"><h3>运行配置</h3><table>
+      <tr><td>LLM 抽取层</td><td>${m.llm.online?'<span class="tag t-ok">在线 '+esc(m.llm.provider)+'</span>':'<span class="tag t-gray">离线规则版</span>'} <span class="muted">${esc(m.llm.prompt)}</span></td></tr>
+      <tr><td>口径注册表</td><td>koujing_v1.0 · 分母=学生×双周周期</td></tr>
+      <tr><td>最小试点范围</td><td>机电专业 × 5 家企业 × 1 学期</td></tr>
+      <tr><td>停止条件</td><td class="muted">低置信(<0.6)·缺字段·越权·系统不可用 → 一律转人工</td></tr>
+    </table></div>
+  </div>`;
+}
+
+/* ---- 反馈归集 ---- */
+async function renderFb(){
+  const fbs=await api('/api/feedbacks');
+  const canSubmit=['mentor','teacher','jiaowu','admin'].includes(ME.role);
+  const stus=ME.role!=='mentor'?await api('/api/feedbacks').then(()=>null):null;
+  vFb.innerHTML=`
+  ${canSubmit?`<div class="card sec"><h3>提交双周反馈（采集 ≤5 项，教育-016）</h3>
+    <div class="row">
+      <div><input id="fSid" placeholder="学号（如 202301010001）"></div>
+      <div><select id="fPeriod"><option>P01</option><option>P02</option></select></div>
+      <div><select id="fTask"><option value="">任务（可留空由抽取器识别）</option>${['数控加工','零件编程','装配调试','质量检验','设备维护','模具设计','工艺文件','CAD制图','现场巡检','物料管理'].map(t=>`<option>${t}</option>`).join('')}</select></div>
+      <div><select id="fSType"><option value="100">百分制</option><option value="5">五分制</option></select></div>
+      <div><input id="fScore" type="number" placeholder="评分"></div>
+    </div>
+    <div class="row" style="margin-top:8px"><div style="flex:4"><textarea id="fC" rows="2" placeholder="评语原文（含具体行为实例更容易通过抽取，例如：本周独立完成 12 件法兰盘毛坯的数控车削加工，1 件超差报废）"></textarea></div>
+    <div style="flex:0;min-width:90px"><button class="act" onclick="submitFb()">提交</button></div></div></div>`:''}
+  <div class="card"><h3>反馈台账（${fbs.length} 条 · 可见域已按角色过滤）</h3>
+  <div style="overflow-x:auto"><table><tr><th>ID</th><th>学生/企业</th><th>周期</th><th>任务</th><th>评分</th><th>评语摘录</th><th>状态</th><th>操作</th></tr>
+  ${fbs.map(f=>`<tr><td>${f.id}</td><td>${esc(f.sname)}<br><span class="muted">${esc(f.ename)}</span></td><td>${esc(f.period)}</td>
+    <td>${esc(f.task_ref)||'<span class="muted">—</span>'}</td>
+    <td>${f.score_raw!=null?esc(f.score_raw)+(f.score_type==='5'?'（5制）':''):''}</td>
+    <td style="max-width:300px">${esc((f.comment||'').slice(0,60))}…</td>
+    <td>${f.status==='insufficient'?'<span class="tag t-bad">证据不足</span>':'<span class="tag t-ok">已提交</span>'}</td>
+    <td><button class="act ghost" onclick="extract(${f.id})">抽取三元组</button></td></tr>`).join('')}
+  </table></div></div>`;
+}
+async function submitFb(){
+  try{
+    await api('/api/feedbacks',{method:'POST',body:{sid:fSid.value.trim(),period:fPeriod.value,
+      taskHint:fTask.value,comment:fC.value,scoreRaw:parseFloat(fScore.value)||null,scoreType:fSType.value}});
+    toast('已提交');renderFb();
+  }catch(e){toast(e.message)}
+}
+async function extract(fid){
+  try{
+    const t=await api('/api/feedbacks/'+fid+'/extract',{method:'POST',body:{}});
+    toast('抽取完成：'+t.status+'（置信度 '+t.confidence+'）');
+    if(t.status==='auto'||t.status==='human_queue')switchTab('sg');else renderFb();
+  }catch(e){toast(e.message)}
+}
+
+/* ---- 变更同步 ---- */
+async function renderCh(){
+  const [chs,todos]=await Promise.all([api('/api/changes'),api('/api/todos')]);
+  const canR=['jiaowu','admin'].includes(ME.role);
+  vCh.innerHTML=`
+  <div class="card sec"><h3>变更台账（${chs.length} 条 · 历史 12 条变更 5 条未同步）</h3>
+  <div style="overflow-x:auto"><table><tr><th>变更</th><th>学生/企业</th><th>原导师→新导师</th><th>同步状态</th><th>错发风险</th><th>操作</th></tr>
+  ${chs.map(c=>`<tr><td>#${c.id} ${esc(c.change_type)}</td><td>${esc(c.sname)}<br><span class="muted">${esc(c.ename)}</span></td>
+    <td>${esc(c.old_mentor)} → ${esc(c.new_mentor)}</td>
+    <td>${c.synced?'<span class="tag t-ok">已同步</span>':'<span class="tag t-warn">未同步</span>'}</td>
+    <td>${c.risk?'<span class="tag t-bad">E1 换岗未同步·旧导师仍收反馈</span>':'<span class="tag t-gray">正常</span>'}</td>
+    <td>${!c.synced&&canR?`<div class="row" style="min-width:220px"><div><input id="nm${c.id}" placeholder="承接导师用户名"></div>
+      <div style="flex:0"><button class="act" onclick="reassign(${c.id})">改派确认</button></div></div>`:(!c.synced?'<span class="muted">待教务改派(N3)</span>':'')}</td></tr>`).join('')}
+  </table></div></div>
+  <div class="card"><h3>改派待办</h3><table><tr><th>业务编号</th><th>状态</th><th>承接人</th><th>说明</th></tr>
+  ${todos.map(t=>`<tr><td>${esc(t.intern_id)}</td>
+    <td>${t.status==='assigned'?'<span class="tag t-ok">已改派</span>':'<span class="tag t-bad">挂起</span>'}</td>
+    <td>${esc(t.assignee)||'—'}</td><td class="muted">${esc(t.note)}</td></tr>`).join('')||'<tr><td colspan=4 class="muted">暂无</td></tr>'}
+  </table></div>`;
+}
+async function reassign(cid){
+  try{const r=await api('/api/changes/'+cid+'/reassign',{method:'POST',body:{newMentor:document.getElementById('nm'+cid).value.trim()}});
+    toast(r.ok?'改派成功（N3 具名承接）':'挂起：'+(r.fails||[]).join('；'));renderCh();
+  }catch(e){toast(e.message)}
+}
+
+/* ---- 建议复核 ---- */
+async function renderSg(){
+  const [trs,sgs]=await Promise.all([api('/api/triples'),api('/api/suggestions')]);
+  const canPromote=['teacher','jowu','jiaowu','admin'].includes(ME.role);
+  const canSign=['jiaowu','audit','admin'].includes(ME.role);
+  vSg.innerHTML=`
+  <div class="card sec"><h3>三元组（抽取结果 · 置信度<0.6 一律停在人工队列）</h3>
+  <div style="overflow-x:auto"><table><tr><th>ID</th><th>学生/企业</th><th>任务</th><th>行为实例（含原文区间回指）</th><th>课程候选</th><th>置信度</th><th>状态</th><th>操作</th></tr>
+  ${trs.map(t=>`<tr><td>${t.id}</td><td>${esc(t.sname)}<br><span class="muted">${esc(t.ename)}</span></td>
+    <td>${esc(t.task_ref)||'—'}</td><td style="max-width:260px">${esc(t.observed_behavior)||'<span class="tag t-bad">证据不足</span>'}</td>
+    <td>${esc(t.course_hint)||'<span class="muted">待人工归属</span>'}</td><td>${t.confidence}</td>
+    <td>${t.status==='auto'?'<span class="tag t-ok">自动抽取</span>':t.status==='human_queue'?'<span class="tag t-warn">人工队列</span>':t.status==='human_confirmed'?'<span class="tag t-info">已复核</span>':t.status==='insufficient_evidence'?'<span class="tag t-bad">证据不足</span>':'<span class="tag t-gray">'+esc(t.status)+'</span>'}</td>
+    <td>${(t.status==='auto'||t.status==='human_queue')&&canPromote?`<button class="act" onclick="promote(${t.id})">复核通过→建议</button>`:''}</td></tr>`).join('')}
+  </table></div></div>
+  <div class="card"><h3>改进建议表（N2 三要素：课程·任务·责任人 + 原记录引用）</h3>
+  <div style="overflow-x:auto"><table><tr><th>ID</th><th>学生/企业</th><th>课程</th><th>任务</th><th>差距/建议</th><th>原记录引用</th><th>状态</th><th>签核</th></tr>
+  ${sgs.map(s=>`<tr><td>${s.id}</td><td>${esc(s.sname)}<br><span class="muted">${esc(s.ename)}</span></td>
+    <td>${esc(s.course)||'—'}</td><td>${esc(s.task_ref)||'—'}</td>
+    <td style="max-width:240px">${esc(s.gap)}：${esc(s.suggestion)}</td>
+    <td class="muted" style="max-width:150px">${esc(s.feedback_ref)}</td>
+    <td>${s.status==='formal'?'<span class="tag t-ok">已入库</span>':s.status==='pending_sign'?'<span class="tag t-info">待签核</span>':'<span class="tag t-warn">草稿(缺要素)</span>'}</td>
+    <td>${s.status==='pending_sign'&&canSign?`<button class="act" onclick="approve(${s.id})">签核入库</button>`:esc(s.signed_by||'')}</td></tr>`).join('')||'<tr><td colspan=8 class="muted">暂无——先在「反馈归集」抽取三元组</td></tr>'}
+  </table></div></div>`;
+}
+async function promote(tid){
+  try{const r=await api('/api/triples/'+tid+'/promote',{method:'POST',body:{}});
+    toast(r.status==='pending_sign'?'N2 通过，待签核':'存为草稿，缺：'+(r.missing||[]).join('、'));renderSg();
+  }catch(e){toast(e.message)}
+}
+async function approve(sid){
+  try{await api('/api/suggestions/'+sid+'/approve',{method:'POST',body:{}});toast('已签核入库（formal）');renderSg();
+  }catch(e){toast(e.message)}
+}
+
+/* ---- 知识库 ---- */
+async function renderKb(){
+  vKb.innerHTML=`
+  <div class="card sec"><h3>知识库问答（RAG 检索 + LLM · 引用可回指证据编号）</h3>
+  <div class="row"><div style="flex:4"><input id="kq" placeholder="试试：换岗后反馈错发怎么办 / 完整率分母怎么算 / 成绩能不能写回 / 五分制怎么换算"></div>
+  <div style="flex:0"><button class="act" onclick="kbAsk()">提 问</button></div></div>
+  <div id="kAns" class="sec" style="margin-top:12px"></div></div>
+  <div class="card" id="kWiki"><h3>Wiki 知识页（口径注册表 · 任务清单 · 制度条款 · 企业档案 · 停止条件）</h3><div id="kList">加载中…</div></div>`;
+  const pages=await api('/api/wiki');
+  kList.innerHTML=pages.map(p=>`<details style="margin:8px 0"><summary><b>${esc(p.title)}</b> <span class="tag t-gray">${esc(p.code)}</span> ${p.tags.map(t=>`<span class="tag t-info">${esc(t)}</span>`).join('')}</summary><div class="muted" style="padding:8px 4px">${esc(p.body)}</div></details>`).join('');
+}
+async function kbAsk(){
+  kAns.innerHTML='<span class="muted">检索中…</span>';
+  try{const r=await api('/api/kb/ask',{method:'POST',body:{question:kq.value}});
+    kAns.innerHTML=`<div style="white-space:pre-wrap">${esc(r.answer)}</div>
+    <div style="margin-top:8px">${r.citations.map(c=>`<div class="cite">引用【${esc(c.code)}】${esc(c.title)}</div>`).join('')}</div>`;
+  }catch(e){kAns.innerHTML='<span class="bad">'+esc(e.message)+'</span>'}
+}
+
+/* ---- Harness ---- */
+async function renderHs(){
+  vHs.innerHTML=`<div class="card sec"><h3>Harness 测试台 · 16 项检查（权限 / 不可逆动作 / E1–E8 / RAG）</h3>
+  <p class="muted" style="margin-bottom:10px">一次性运行全部确定性校验：错误密码 401、跨企业越权留痕、成绩写回拒绝、错发检测、改派幂等、证据不足退回、低置信转人工、N2 三要素、口径备案、审计只追加、RAG 命中……</p>
+  <button class="act" onclick="runHs()">▶ 运行测试</button> <span id="hsStat" class="muted"></span></div>
+  <div class="card" id="hsOut">${HARNESS?hsTable(HARNESS):'<span class="muted">尚未运行。运行期间会真实调用本服务接口并写入审计。</span>'}</div>`;
+}
+function hsTable(h){
+  return `<p style="margin:8px 0"><b>${h.passed}/${h.total} 通过</b>
+   ${h.failed===0?'<span class="tag t-ok">全部通过</span>':'<span class="tag t-bad">'+h.failed+' 项失败</span>'}</p>
+  <table><tr><th>检查项</th><th>分组</th><th>期望</th><th>实际</th><th>结果</th></tr>
+  ${h.results.map(r=>`<tr><td>${esc(r.name)}</td><td><span class="tag t-gray">${esc(r.group)}</span></td>
+   <td class="muted">${esc(r.expect)}</td><td class="muted">${esc(r.actual)}</td>
+   <td class="${r.pass?'pass':'fail'}">${r.pass?'✓':'✗'}</td></tr>`).join('')}</table>`;
+}
+async function runHs(){
+  hsStat.textContent='运行中…';
+  try{HARNESS=await api('/api/harness/run');hsOut.innerHTML=hsTable(HARNESS);
+    hsStat.textContent=HARNESS.passed+'/'+HARNESS.total+' 通过';}
+  catch(e){hsStat.textContent=e.message}
+}
+
+/* ---- 审计 ---- */
+async function renderAu(){
+  const rows=await api('/api/audit');
+  vAu.innerHTML=`<div class="card"><h3>审计日志（只追加 · ${ME.role==='audit'||ME.role==='admin'?'全量':'本人操作'} · 共 ${rows.length} 条）</h3>
+  <div style="overflow-x:auto"><table><tr><th>#</th><th>时间</th><th>操作人</th><th>动作</th><th>对象</th><th>明细</th><th>结果</th></tr>
+  ${rows.map(r=>`<tr><td>${r.id}</td><td class="muted">${new Date(r.ts*1000).toLocaleString('zh-CN')}</td>
+   <td>${esc(r.actor)}</td><td><span class="tag t-gray">${esc(r.action)}</span></td><td>${esc(r.target)}</td>
+   <td class="muted" style="max-width:260px">${esc(r.detail)}</td>
+   <td>${r.result==='OK'?'<span class="tag t-ok">OK</span>':r.result==='DENIED'?'<span class="tag t-bad">DENIED</span>':r.result==='REJECTED'?'<span class="tag t-warn">REJ</span>':r.result==='HELD'?'<span class="tag t-warn">HELD</span>':'<span class="tag t-gray">'+esc(r.result)+'</span>'}</td></tr>`).join('')}
+  </table></div></div>`;
+}
+
+/* ---- 管理（仅 SaaS 管理员） ---- */
+async function renderAd(){
+  if(ME.role!=='admin'){vAd.innerHTML='<div class="card muted">仅 SaaS 管理员可见</div>';return}
+  const d=await api('/api/admin/users');
+  const cfg=await api('/api/config');
+  vAd.innerHTML=`
+  <div class="grid g2 sec">
+    <div class="card"><h3>用户与分层权限（SaaS 管理端）</h3>
+    <table><tr><th>账号</th><th>姓名</th><th>角色</th><th>数据域</th></tr>
+    ${d.users.map(u=>`<tr><td>${esc(u.username)}</td><td>${esc(u.display)}</td>
+      <td><span class="tag t-info">${esc(u.roleName)}</span></td><td>${u.org_id?esc(u.org_id):'全量'}</td></tr>`).join('')}</table>
+    <div class="row" style="margin-top:10px">
+      <div><input id="nu1" placeholder="账号"></div><div><input id="nu2" type="password" placeholder="密码"></div>
+      <div><input id="nu3" placeholder="姓名"></div>
+      <div><select id="nu4">${Object.entries({admin:'SaaS管理员',jiaowu:'教务',teacher:'教师',mentor:'企业导师',audit:'风险合规'}).map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}</select></div>
+      <div><select id="nu5"><option value="">数据域：全量</option>${d.enterprises.map(e=>`<option value="${e.id}">仅 ${esc(e.name)}</option>`).join('')}</select></div>
+      <div style="flex:0"><button class="act" onclick="addUser()">新增</button></div>
+    </div></div>
+    <div class="card"><h3>口径注册表（${esc(cfg.version)}）</h3>
+    <table><tr><td>完整率分母</td><td>${esc(cfg.denominator)}</td></tr>
+    <tr><td>统计周期</td><td>${cfg.periods.join('、')}（学期共 10 期）</td></tr>
+    <tr><td>五分制换算备案</td><td>${Object.entries(cfg.scaleMap['5']).map(([k,v])=>k+'→'+v).join('，')}</td></tr>
+    ${cfg.enterprises.map(e=>`<tr><td>${esc(e.name)}</td><td>${e.score_type==='5'?'五分制':'百分制'} · ${e.scale_status==='filed'?'<span class="tag t-ok">备案</span>':'<span class="tag t-bad">未备案→不参与汇总</span>'}</td></tr>`).join('')}
+    </table></div>
+  </div>`;
+}
+async function addUser(){
+  try{await api('/api/admin/users',{method:'POST',body:{username:nu1.value.trim(),password:nu2.value,display:nu3.value,role:nu4.value,orgId:nu5.value||null}});
+    toast('已新增');renderAd();
+  }catch(e){toast(e.message)}
+}
+</script>
+</body>
+</html>
