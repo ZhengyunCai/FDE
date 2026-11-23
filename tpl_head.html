@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>FDE MVP · 实习管理与教学改进（知行职业学院 · 机电试点）</title>
+<meta name="description" content="FDE 训练营 MVP：实习反馈归集、变更同步、三元组抽取、建议复核、知识库 RAG、分层权限与 Harness 测试台。" />
+<meta property="og:title" content="FDE MVP · 实习管理与教学改进" />
+<meta property="og:description" content="换岗错发拦截 + 反馈事实归集 + 改进建议草稿 + 知识库检索 + 分层权限 + 30 项自动化评测。" />
+<style>
+*{box-sizing:border-box}
+:root{
+  --bg:#eef2f7; --card:#ffffff; --line:#dfe6ef; --line2:#edf1f7;
+  --ink:#16202e; --sub:#5c6c82; --mute:#8b9bb0;
+  --brand:#1f5fbf; --brand-soft:#eaf1fc; --teal:#0f8f83; --teal-soft:#e6f6f4;
+  --risk:#c0263c; --risk-soft:#fdecef; --ok:#177a48; --ok-soft:#e8f5ee;
+  --warn:#a8681a; --warn-soft:#fdf4e6;
+  --shadow:0 1px 2px rgba(22,32,46,.05),0 8px 24px rgba(22,32,46,.05);
+}
+html,body{margin:0;height:100%}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  background:var(--bg);color:var(--ink);font-size:14px;line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit}
+.hidden{display:none !important}
+
+/* ---------- 登录 ---------- */
+#login{min-height:100%;display:flex;align-items:center;justify-content:center;padding:32px 20px}
+.loginWrap{width:100%;max-width:940px;display:grid;grid-template-columns:1.05fr .95fr;gap:0;
+  background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:var(--shadow)}
+.loginLeft{padding:40px 36px;background:linear-gradient(160deg,#f7faff 0%,#eef4fe 55%,#e9f6f4 100%);border-right:1px solid var(--line)}
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--brand);
+  background:#fff;border:1px solid #d5e3f8;border-radius:999px;padding:4px 10px}
+.loginLeft h1{font-size:25px;line-height:1.35;margin:16px 0 8px;letter-spacing:-.2px}
+.loginLeft p.lead{color:var(--sub);margin:0 0 22px;font-size:13.5px}
+.flowMini{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px}
+.flowMini span{font-size:11.5px;color:#31465f;background:#fff;border:1px solid var(--line);
+  border-radius:6px;padding:3px 8px}
+.flowMini i{color:var(--mute);font-style:normal;font-size:11px;align-self:center}
+.kpiMini{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.kpiMini div{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.kpiMini b{display:block;font-size:17px;letter-spacing:-.3px}
+.kpiMini small{color:var(--mute);font-size:11px}
+.loginRight{padding:40px 36px;display:flex;flex-direction:column;justify-content:center}
+.loginRight h2{margin:0 0 4px;font-size:17px}
+.loginRight .hint{color:var(--sub);font-size:12.5px;margin:0 0 18px}
+label.f{display:block;font-size:12px;color:var(--sub);margin:0 0 5px}
+input.f,select.f,textarea.f{width:100%;border:1px solid var(--line);border-radius:9px;padding:9px 11px;
+  font-size:13.5px;color:var(--ink);background:#fff;outline:none;font-family:inherit}
+input.f:focus,select.f:focus,textarea.f:focus{border-color:#9fc0ee;box-shadow:0 0 0 3px #eaf1fc}
+.btn{border:1px solid transparent;border-radius:9px;padding:9px 14px;font-size:13px;cursor:pointer;
+  background:var(--brand);color:#fff;transition:.15s}
+.btn:hover{filter:brightness(1.06)}
+.btn.ghost{background:#fff;border-color:var(--line);color:#31465f}
+.btn.ghost:hover{background:#f7f9fd}
+.btn.small{padding:5px 10px;font-size:12px;border-radius:7px}
+.btn.danger{background:var(--risk)}
+.btn.teal{background:var(--teal)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.quick{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:18px}
+.quick button{text-align:left;background:#fff;border:1px solid var(--line);border-radius:9px;
+  padding:8px 10px;cursor:pointer;font-size:12px;color:#31465f}
+.quick button:hover{border-color:#9fc0ee;background:#f8fbff}
+.quick button b{display:block;font-size:12.5px;color:var(--ink)}
+.quick button small{color:var(--mute);font-size:11px}
+.err{color:var(--risk);font-size:12.5px;margin-top:10px;min-height:18px}
+
+/* ---------- 主体 ---------- */
+#app{display:grid;grid-template-columns:216px 1fr;min-height:100%}
+.side{background:var(--card);border-right:1px solid var(--line);padding:18px 12px;position:sticky;top:0;height:100vh;
+  display:flex;flex-direction:column}
+.brand{display:flex;align-items:center;gap:9px;padding:2px 8px 16px}
+.logo{width:30px;height:30px;border-radius:8px;background:linear-gradient(140deg,#1f5fbf,#0f8f83);
+  color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;letter-spacing:.5px}
+.brand b{font-size:13.5px;display:block;line-height:1.25}
+.brand small{font-size:10.5px;color:var(--mute)}
+nav{display:flex;flex-direction:column;gap:2px;margin-top:6px}
+nav button{display:flex;align-items:center;gap:9px;border:0;background:transparent;text-align:left;
+  padding:8px 10px;border-radius:8px;font-size:13px;color:#3d4f66;cursor:pointer}
+nav button:hover{background:#f5f8fd}
+nav button.on{background:var(--brand-soft);color:var(--brand);font-weight:600}
+nav button i{font-style:normal;width:18px;text-align:center;font-size:13px;color:inherit;opacity:.85}
+.sideFoot{margin-top:auto;border-top:1px solid var(--line2);padding-top:12px;font-size:11.5px;color:var(--mute)}
+.who{display:flex;align-items:center;gap:8px;padding:8px 8px 10px}
+.avatar{width:26px;height:26px;border-radius:50%;background:#dbe7f8;color:#1f5fbf;display:flex;
+  align-items:center;justify-content:center;font-size:11.5px;font-weight:700;flex:0 0 auto}
+.who b{font-size:12px;display:block;line-height:1.2}
+.who small{font-size:10.5px;color:var(--mute)}
+main{padding:20px 26px 40px;min-width:0}
+.top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px}
+.top h1{margin:0;font-size:19px;letter-spacing:-.2px}
+.top p{margin:3px 0 0;color:var(--sub);font-size:12.5px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.chip{font-size:11.5px;border:1px solid var(--line);background:#fff;border-radius:999px;padding:3px 9px;color:#42566e}
+.chip.b{color:var(--brand);border-color:#cfe0f8;background:#f5f9ff}
+.chip.g{color:var(--ok);border-color:#c8e8d6;background:var(--ok-soft)}
+.chip.r{color:var(--risk);border-color:#f3c9d1;background:var(--risk-soft)}
+.chip.y{color:var(--warn);border-color:#f0dcb8;background:var(--warn-soft)}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:16px 18px;margin-bottom:14px}
+.card h3{margin:0 0 2px;font-size:14px}
+.card .sub{color:var(--mute);font-size:11.5px;margin-bottom:12px}
+.grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.metric{border:1px solid var(--line);border-radius:11px;padding:12px 13px;background:#fff;position:relative;overflow:hidden}
+.metric .k{font-size:11px;color:var(--mute);display:flex;justify-content:space-between;align-items:center}
+.metric .v{font-size:22px;font-weight:650;letter-spacing:-.5px;margin:4px 0 2px}
+.metric .d{font-size:11px;color:var(--sub)}
+.bar{height:4px;border-radius:3px;background:#eef2f8;margin-top:8px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--brand);border-radius:3px}
+.metric.ok .bar i{background:var(--ok)}
+.metric.bad .bar i{background:var(--risk)}
+.metric .tag{position:absolute;right:10px;top:10px;font-size:10px;padding:1px 6px;border-radius:999px}
+.tag.ok{background:var(--ok-soft);color:var(--ok)}
+.tag.bad{background:var(--risk-soft);color:var(--risk)}
+
+.pipe{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.pipe .step{flex:1 1 130px;border:1px solid var(--line);border-radius:10px;padding:9px 11px;background:#fbfcfe}
+.pipe .step b{display:block;font-size:12px}
+.pipe .step small{color:var(--mute);font-size:10.5px;display:block;line-height:1.45}
+.pipe .arr{align-self:center;color:#b9c6d6;padding:0 5px;font-size:12px}
+
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{text-align:left;color:var(--sub);font-weight:600;font-size:11.5px;background:#f7f9fc;
+  border-bottom:1px solid var(--line);padding:8px 9px;white-space:nowrap}
+td{border-bottom:1px solid var(--line2);padding:8px 9px;vertical-align:top}
+tbody tr:hover{background:#fafcff}
+td.mono,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11.5px}
+.st{display:inline-block;font-size:11px;border-radius:999px;padding:1.5px 7px;white-space:nowrap}
+.st.ok{background:var(--ok-soft);color:var(--ok)}
+.st.bad{background:var(--risk-soft);color:var(--risk)}
+.st.warn{background:var(--warn-soft);color:var(--warn)}
+.st.info{background:var(--brand-soft);color:var(--brand)}
+.st.mute{background:#f0f3f8;color:var(--sub)}
+.scroll{overflow:auto;max-height:420px;border:1px solid var(--line2);border-radius:9px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.spacer{flex:1}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.kv{display:grid;grid-template-columns:106px 1fr;gap:4px 10px;font-size:12.5px}
+.kv dt{color:var(--mute)}
+.kv dd{margin:0}
+.note{font-size:11.5px;color:var(--sub);background:#f7f9fc;border:1px dashed var(--line);border-radius:9px;padding:9px 11px}
+.hit{border:1px solid var(--line);border-radius:10px;padding:9px 11px;margin-bottom:8px;background:#fff}
+.hit b{font-size:12.5px}
+.hit p{margin:3px 0 0;font-size:12px;color:var(--sub);line-height:1.55}
+.hit .sc{float:right;font-size:11px;color:var(--brand);background:var(--brand-soft);border-radius:999px;padding:1px 7px}
+pre.ans{white-space:pre-wrap;font-family:inherit;font-size:12.5px;background:#f7f9fc;border:1px solid var(--line);
+  border-radius:10px;padding:11px 13px;margin:0}
+.wikiItem{border:1px solid var(--line);border-radius:10px;margin-bottom:8px;overflow:hidden}
+.wikiItem>button{width:100%;text-align:left;background:#fff;border:0;padding:10px 12px;cursor:pointer;font-size:13px;font-weight:600;color:var(--ink);display:flex;gap:8px;align-items:center}
+.wikiItem>div{padding:0 12px 12px;font-size:12.5px;color:#37485f;white-space:pre-wrap}
+.wikiItem .code{font-size:10.5px;color:var(--brand);background:var(--brand-soft);border-radius:5px;padding:1px 6px;font-weight:500}
+.hsSum{display:flex;gap:16px;align-items:baseline;margin-bottom:10px}
+.hsSum b{font-size:26px}
+.hsGroup{margin:10px 0 2px;font-size:11.5px;color:var(--mute);letter-spacing:.3px}
+.hsRow{display:grid;grid-template-columns:18px 1fr 120px 160px;gap:8px;align-items:center;
+  border-bottom:1px solid var(--line2);padding:6px 2px;font-size:12px}
+.hsRow .ico{font-weight:700}
+.hsRow .ok{color:var(--ok)}
+.hsRow .no{color:var(--risk)}
+.hsRow .act{color:var(--sub);font-size:11.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.matrix td,.matrix th{font-size:12px}
+.matrix .y{color:var(--ok);font-weight:600}
+.matrix .n{color:var(--risk);font-weight:600}
+.matrix .p{color:var(--warn)}
+.toast{position:fixed;right:20px;bottom:20px;background:#16202e;color:#fff;padding:10px 14px;border-radius:10px;
+  font-size:12.5px;box-shadow:0 10px 30px rgba(0,0,0,.18);opacity:0;transform:translateY(8px);transition:.2s;z-index:50;max-width:380px}
+.toast.show{opacity:1;transform:none}
+.toast.err{background:#8d1d2e}
+.toast.ok{background:#14603c}
+.foot{color:var(--mute);font-size:11px;margin-top:18px;line-height:1.7}
+@media (max-width:1080px){
+  .grid5{grid-template-columns:repeat(2,1fr)}
+  .two{grid-template-columns:1fr}
+  #app{grid-template-columns:1fr}
+  .side{position:static;height:auto;flex-direction:row;flex-wrap:wrap;align-items:center;gap:8px}
+  nav{flex-direction:row;flex-wrap:wrap}
+  .sideFoot{display:none}
+}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+
+<!-- ================= 登录 ================= -->
+<div id="login">
+  <div class="loginWrap">
+    <div class="loginLeft">
+      <span class="badge">FDE 九阶段 · 阶段 04 方案设计的可运行验证</span>
+      <h1>实习反馈归集与<br/>教学改进最小闭环</h1>
+      <p class="lead">知行职业学院 · 机电专业 × 5 家企业 × 1 学期试点。把“换岗错发、评语不可用、建议无法落地”三件事，做成一条可追溯、可拦截、可复核的流水线。</p>
+      <div class="flowMini">
+        <span>① 接入</span><i>→</i><span>② 口径映射</span><i>→</i><span>③ 确定性规则</span><i>→</i><span>④ 抽取（模型）</span><i>→</i><span>⑤ 人工复核</span><i>→</i><span>⑥ 建议入库</span>
+      </div>
+      <div class="kpiMini">
+        <div><b>54% → 85%</b><small>可用完整率目标</small></div>
+        <div><b>10 h → 6 h</b><small>教师月整理工时</small></div>
+        <div><b>0 条</b><small>错发硬指标（E1）</small></div>
+      </div>
+    </div>
+    <div class="loginRight">
+      <h2>登录工作台</h2>
+      <p class="hint">选择角色快速进入，或用账号密码登录。不同角色看到的数据范围不同。</p>
+      <div style="margin-bottom:10px">
+        <label class="f">账号</label>
+        <input class="f" id="uName" value="admin" autocomplete="username" />
+      </div>
+      <div style="margin-bottom:14px">
+        <label class="f">密码</label>
+        <input class="f" id="uPwd" type="password" value="admin123" autocomplete="current-password" />
+      </div>
+      <button class="btn" onclick="doLogin()">登录</button>
+      <div class="err" id="loginErr"></div>
+      <div class="quick">
+        <button onclick="quick('admin')"><b>SaaS 管理员</b><small>admin / admin123</small></button>
+        <button onclick="quick('tangyj')"><b>教务管理员</b><small>tangyj / tang123</small></button>
+        <button onclick="quick('linyz')"><b>实习指导教师</b><small>linyz / lin123</small></button>
+        <button onclick="quick('yesh')"><b>企业导师（恒晟）</b><small>yesh / ye123</small></button>
+        <button onclick="quick('yesh2')"><b>企业导师（甬泰）</b><small>yesh2 / ye456</small></button>
+        <button onclick="quick('fujing')"><b>风险合规</b><small>fujing / fu123</small></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= 工作台 ================= -->
+<div id="app" class="hidden">
+  <aside class="side">
+    <div class="brand">
+      <div class="logo">FDE</div>
+      <div><b>实习管理与教学改进</b><small>知行职业学院 · 机电试点</small></div>
+    </div>
+    <nav id="nav"></nav>
+    <div class="sideFoot">
+      <div class="who">
+        <div class="avatar" id="avatar">A</div>
+        <div><b id="whoName">—</b><small id="whoRole">—</small></div>
+      </div>
+      <button class="btn ghost small" style="width:100%" onclick="logout()">切 换 账 号</button>
+    </div>
+  </aside>
+  <main>
+    <div class="top">
+      <div>
+        <h1 id="pageTitle">总览</h1>
+        <p id="pageSub">—</p>
+      </div>
+      <div class="chips" id="topChips"></div>
+    </div>
+    <div id="view"></div>
+    <div class="foot">
+      本页为 MVP 的浏览器内运行版：与 FastAPI 版共用同一套接口契约（/api/*）、口径注册表、权限矩阵与种子数据（36 条访谈事实 教育-001～036）。
+      后端源码见 GitHub <b>ZhengyunCai/FDE</b>；本地起服务：<span class="mono">pip install -r requirements.txt &amp;&amp; python main.py</span>。
+    </div>
+  </main>
+</div>
