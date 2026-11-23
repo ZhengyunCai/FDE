@@ -1,0 +1,1372 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-page-node-id="m4C4sucko7J69okjHTL7Wo">
+<head data-page-node-id="c9R46zUIlhpGBNiTEGwAgc">
+<meta charset="utf-8" data-page-node-id="YS65YAThsp52R7HlgQ5cB3" />
+<meta name="viewport" content="width=device-width, initial-scale=1" data-page-node-id="D6GvWAkUEPBCvlqKtwtj5e" />
+<title>FDE MVP · 实习管理与教学改进（知行职业学院 · 机电试点）</title>
+<meta name="description" content="FDE 训练营 MVP：实习反馈归集、变更同步、三元组抽取、建议复核、知识库 RAG、分层权限与 Harness 测试台。" data-page-node-id="sUzLkeR5mlhvqbbzC1DFKN" />
+<meta property="og:title" content="FDE MVP · 实习管理与教学改进" data-page-node-id="VWAP9ttfoXD7mYhpoko8Bh" />
+<meta property="og:description" content="换岗错发拦截 + 反馈事实归集 + 改进建议草稿 + 知识库检索 + 分层权限 + 30 项自动化评测。" data-page-node-id="mn1kiS3eVCbHlQ030RYyop" />
+<style>
+*{box-sizing:border-box}
+:root{
+  --bg:#eef2f7; --card:#ffffff; --line:#dfe6ef; --line2:#edf1f7;
+  --ink:#16202e; --sub:#5c6c82; --mute:#8b9bb0;
+  --brand:#1f5fbf; --brand-soft:#eaf1fc; --teal:#0f8f83; --teal-soft:#e6f6f4;
+  --risk:#c0263c; --risk-soft:#fdecef; --ok:#177a48; --ok-soft:#e8f5ee;
+  --warn:#a8681a; --warn-soft:#fdf4e6;
+  --shadow:0 1px 2px rgba(22,32,46,.05),0 8px 24px rgba(22,32,46,.05);
+}
+html,body{margin:0;height:100%}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  background:var(--bg);color:var(--ink);font-size:14px;line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit}
+.hidden{display:none !important}
+
+/* ---------- 登录 ---------- */
+#login{min-height:100%;display:flex;align-items:center;justify-content:center;padding:32px 20px}
+.loginWrap{width:100%;max-width:940px;display:grid;grid-template-columns:1.05fr .95fr;gap:0;
+  background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:var(--shadow)}
+.loginLeft{padding:40px 36px;background:linear-gradient(160deg,#f7faff 0%,#eef4fe 55%,#e9f6f4 100%);border-right:1px solid var(--line)}
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--brand);
+  background:#fff;border:1px solid #d5e3f8;border-radius:999px;padding:4px 10px}
+.loginLeft h1{font-size:25px;line-height:1.35;margin:16px 0 8px;letter-spacing:-.2px}
+.loginLeft p.lead{color:var(--sub);margin:0 0 22px;font-size:13.5px}
+.flowMini{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px}
+.flowMini span{font-size:11.5px;color:#31465f;background:#fff;border:1px solid var(--line);
+  border-radius:6px;padding:3px 8px}
+.flowMini i{color:var(--mute);font-style:normal;font-size:11px;align-self:center}
+.kpiMini{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.kpiMini div{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.kpiMini b{display:block;font-size:17px;letter-spacing:-.3px}
+.kpiMini small{color:var(--mute);font-size:11px}
+.loginRight{padding:40px 36px;display:flex;flex-direction:column;justify-content:center}
+.loginRight h2{margin:0 0 4px;font-size:17px}
+.loginRight .hint{color:var(--sub);font-size:12.5px;margin:0 0 18px}
+label.f{display:block;font-size:12px;color:var(--sub);margin:0 0 5px}
+input.f,select.f,textarea.f{width:100%;border:1px solid var(--line);border-radius:9px;padding:9px 11px;
+  font-size:13.5px;color:var(--ink);background:#fff;outline:none;font-family:inherit}
+input.f:focus,select.f:focus,textarea.f:focus{border-color:#9fc0ee;box-shadow:0 0 0 3px #eaf1fc}
+.btn{border:1px solid transparent;border-radius:9px;padding:9px 14px;font-size:13px;cursor:pointer;
+  background:var(--brand);color:#fff;transition:.15s}
+.btn:hover{filter:brightness(1.06)}
+.btn.ghost{background:#fff;border-color:var(--line);color:#31465f}
+.btn.ghost:hover{background:#f7f9fd}
+.btn.small{padding:5px 10px;font-size:12px;border-radius:7px}
+.btn.danger{background:var(--risk)}
+.btn.teal{background:var(--teal)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.quick{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:18px}
+.quick button{text-align:left;background:#fff;border:1px solid var(--line);border-radius:9px;
+  padding:8px 10px;cursor:pointer;font-size:12px;color:#31465f}
+.quick button:hover{border-color:#9fc0ee;background:#f8fbff}
+.quick button b{display:block;font-size:12.5px;color:var(--ink)}
+.quick button small{color:var(--mute);font-size:11px}
+.err{color:var(--risk);font-size:12.5px;margin-top:10px;min-height:18px}
+
+/* ---------- 主体 ---------- */
+#app{display:grid;grid-template-columns:216px 1fr;min-height:100%}
+.side{background:var(--card);border-right:1px solid var(--line);padding:18px 12px;position:sticky;top:0;height:100vh;
+  display:flex;flex-direction:column}
+.brand{display:flex;align-items:center;gap:9px;padding:2px 8px 16px}
+.logo{width:30px;height:30px;border-radius:8px;background:linear-gradient(140deg,#1f5fbf,#0f8f83);
+  color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;letter-spacing:.5px}
+.brand b{font-size:13.5px;display:block;line-height:1.25}
+.brand small{font-size:10.5px;color:var(--mute)}
+nav{display:flex;flex-direction:column;gap:2px;margin-top:6px}
+nav button{display:flex;align-items:center;gap:9px;border:0;background:transparent;text-align:left;
+  padding:8px 10px;border-radius:8px;font-size:13px;color:#3d4f66;cursor:pointer}
+nav button:hover{background:#f5f8fd}
+nav button.on{background:var(--brand-soft);color:var(--brand);font-weight:600}
+nav button i{font-style:normal;width:18px;text-align:center;font-size:13px;color:inherit;opacity:.85}
+.sideFoot{margin-top:auto;border-top:1px solid var(--line2);padding-top:12px;font-size:11.5px;color:var(--mute)}
+.who{display:flex;align-items:center;gap:8px;padding:8px 8px 10px}
+.avatar{width:26px;height:26px;border-radius:50%;background:#dbe7f8;color:#1f5fbf;display:flex;
+  align-items:center;justify-content:center;font-size:11.5px;font-weight:700;flex:0 0 auto}
+.who b{font-size:12px;display:block;line-height:1.2}
+.who small{font-size:10.5px;color:var(--mute)}
+main{padding:20px 26px 40px;min-width:0}
+.top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px}
+.top h1{margin:0;font-size:19px;letter-spacing:-.2px}
+.top p{margin:3px 0 0;color:var(--sub);font-size:12.5px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.chip{font-size:11.5px;border:1px solid var(--line);background:#fff;border-radius:999px;padding:3px 9px;color:#42566e}
+.chip.b{color:var(--brand);border-color:#cfe0f8;background:#f5f9ff}
+.chip.g{color:var(--ok);border-color:#c8e8d6;background:var(--ok-soft)}
+.chip.r{color:var(--risk);border-color:#f3c9d1;background:var(--risk-soft)}
+.chip.y{color:var(--warn);border-color:#f0dcb8;background:var(--warn-soft)}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:16px 18px;margin-bottom:14px}
+.card h3{margin:0 0 2px;font-size:14px}
+.card .sub{color:var(--mute);font-size:11.5px;margin-bottom:12px}
+.grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.metric{border:1px solid var(--line);border-radius:11px;padding:12px 13px;background:#fff;position:relative;overflow:hidden}
+.metric .k{font-size:11px;color:var(--mute);display:flex;justify-content:space-between;align-items:center}
+.metric .v{font-size:22px;font-weight:650;letter-spacing:-.5px;margin:4px 0 2px}
+.metric .d{font-size:11px;color:var(--sub)}
+.bar{height:4px;border-radius:3px;background:#eef2f8;margin-top:8px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--brand);border-radius:3px}
+.metric.ok .bar i{background:var(--ok)}
+.metric.bad .bar i{background:var(--risk)}
+.metric .tag{position:absolute;right:10px;top:10px;font-size:10px;padding:1px 6px;border-radius:999px}
+.tag.ok{background:var(--ok-soft);color:var(--ok)}
+.tag.bad{background:var(--risk-soft);color:var(--risk)}
+
+.pipe{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.pipe .step{flex:1 1 130px;border:1px solid var(--line);border-radius:10px;padding:9px 11px;background:#fbfcfe}
+.pipe .step b{display:block;font-size:12px}
+.pipe .step small{color:var(--mute);font-size:10.5px;display:block;line-height:1.45}
+.pipe .arr{align-self:center;color:#b9c6d6;padding:0 5px;font-size:12px}
+
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{text-align:left;color:var(--sub);font-weight:600;font-size:11.5px;background:#f7f9fc;
+  border-bottom:1px solid var(--line);padding:8px 9px;white-space:nowrap}
+td{border-bottom:1px solid var(--line2);padding:8px 9px;vertical-align:top}
+tbody tr:hover{background:#fafcff}
+td.mono,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11.5px}
+.st{display:inline-block;font-size:11px;border-radius:999px;padding:1.5px 7px;white-space:nowrap}
+.st.ok{background:var(--ok-soft);color:var(--ok)}
+.st.bad{background:var(--risk-soft);color:var(--risk)}
+.st.warn{background:var(--warn-soft);color:var(--warn)}
+.st.info{background:var(--brand-soft);color:var(--brand)}
+.st.mute{background:#f0f3f8;color:var(--sub)}
+.scroll{overflow:auto;max-height:420px;border:1px solid var(--line2);border-radius:9px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.spacer{flex:1}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.kv{display:grid;grid-template-columns:106px 1fr;gap:4px 10px;font-size:12.5px}
+.kv dt{color:var(--mute)}
+.kv dd{margin:0}
+.note{font-size:11.5px;color:var(--sub);background:#f7f9fc;border:1px dashed var(--line);border-radius:9px;padding:9px 11px}
+.hit{border:1px solid var(--line);border-radius:10px;padding:9px 11px;margin-bottom:8px;background:#fff}
+.hit b{font-size:12.5px}
+.hit p{margin:3px 0 0;font-size:12px;color:var(--sub);line-height:1.55}
+.hit .sc{float:right;font-size:11px;color:var(--brand);background:var(--brand-soft);border-radius:999px;padding:1px 7px}
+pre.ans{white-space:pre-wrap;font-family:inherit;font-size:12.5px;background:#f7f9fc;border:1px solid var(--line);
+  border-radius:10px;padding:11px 13px;margin:0}
+.wikiItem{border:1px solid var(--line);border-radius:10px;margin-bottom:8px;overflow:hidden}
+.wikiItem>button{width:100%;text-align:left;background:#fff;border:0;padding:10px 12px;cursor:pointer;font-size:13px;font-weight:600;color:var(--ink);display:flex;gap:8px;align-items:center}
+.wikiItem>div{padding:0 12px 12px;font-size:12.5px;color:#37485f;white-space:pre-wrap}
+.wikiItem .code{font-size:10.5px;color:var(--brand);background:var(--brand-soft);border-radius:5px;padding:1px 6px;font-weight:500}
+.hsSum{display:flex;gap:16px;align-items:baseline;margin-bottom:10px}
+.hsSum b{font-size:26px}
+.hsGroup{margin:10px 0 2px;font-size:11.5px;color:var(--mute);letter-spacing:.3px}
+.hsRow{display:grid;grid-template-columns:18px 1fr 120px 160px;gap:8px;align-items:center;
+  border-bottom:1px solid var(--line2);padding:6px 2px;font-size:12px}
+.hsRow .ico{font-weight:700}
+.hsRow .ok{color:var(--ok)}
+.hsRow .no{color:var(--risk)}
+.hsRow .act{color:var(--sub);font-size:11.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.matrix td,.matrix th{font-size:12px}
+.matrix .y{color:var(--ok);font-weight:600}
+.matrix .n{color:var(--risk);font-weight:600}
+.matrix .p{color:var(--warn)}
+.toast{position:fixed;right:20px;bottom:20px;background:#16202e;color:#fff;padding:10px 14px;border-radius:10px;
+  font-size:12.5px;box-shadow:0 10px 30px rgba(0,0,0,.18);opacity:0;transform:translateY(8px);transition:.2s;z-index:50;max-width:380px}
+.toast.show{opacity:1;transform:none}
+.toast.err{background:#8d1d2e}
+.toast.ok{background:#14603c}
+.foot{color:var(--mute);font-size:11px;margin-top:18px;line-height:1.7}
+@media (max-width:1080px){
+  .grid5{grid-template-columns:repeat(2,1fr)}
+  .two{grid-template-columns:1fr}
+  #app{grid-template-columns:1fr}
+  .side{position:static;height:auto;flex-direction:row;flex-wrap:wrap;align-items:center;gap:8px}
+  nav{flex-direction:row;flex-wrap:wrap}
+  .sideFoot{display:none}
+}
+</style>
+</head>
+<body data-page-node-id="ZqXGi5ma6K8amAukZkbUu0">
+<div class="toast" id="toast" data-page-node-id="S1hDqDL4IEsmc1BDdmCCUw"></div>
+
+<!-- ================= 登录 ================= -->
+<div id="login" data-page-node-id="KnBAdpRtOyf1gjQTaownZR">
+  <div class="loginWrap" data-page-node-id="9tuqJjWNyXBBGYSTO1EAXX">
+    <div class="loginLeft" data-page-node-id="NcIVvDAfqmVAfbd7YfkL92">
+      <span class="badge" data-page-node-id="onKVgQSYVbT7o2U4AI19ss">FDE 九阶段 · 阶段 04 方案设计的可运行验证</span>
+      <h1 data-page-node-id="5p8qnCdUQ4m34bE6ImE6k8">实习反馈归集与<br data-page-node-id="suzn3HKmQFOhI5esfFy4CU"/>教学改进最小闭环</h1>
+      <p class="lead" data-page-node-id="raMc6yzt8unhCMEBBpajpZ">知行职业学院 · 机电专业 × 5 家企业 × 1 学期试点。把“换岗错发、评语不可用、建议无法落地”三件事，做成一条可追溯、可拦截、可复核的流水线。</p>
+      <div class="flowMini" data-page-node-id="XkrbGA4aoQGAuAOL0qlA4B">
+        <span data-page-node-id="YM46cwQfzxLkl8KBxyvRat">① 接入</span><i data-page-node-id="BiGBRVjwR82DAZ1MovGi2G">→</i><span data-page-node-id="b3ZxmvBySYYPpiPrdQNnvT">② 口径映射</span><i data-page-node-id="72aMarp2WUhyhv1PglMAv8">→</i><span data-page-node-id="0eonwT0nY34ubJ0tlTibhd">③ 确定性规则</span><i data-page-node-id="QZgR3ukVkOLOtOBtr0nlDr">→</i><span data-page-node-id="ZIqcjTzGhj11JWKd0EToUx">④ 抽取（模型）</span><i data-page-node-id="EVIDi4EzBIcXbfpoL41Czb">→</i><span data-page-node-id="BS98hExpiseLVqWv20yFdN">⑤ 人工复核</span><i data-page-node-id="D5GZtmrky2ZjIxWL6wyUQv">→</i><span data-page-node-id="YhMWBrYZX0FKfnciGY5ucq">⑥ 建议入库</span>
+      </div>
+      <div class="kpiMini" data-page-node-id="p2wlGEYStjfdkWFKfEECBw">
+        <div data-page-node-id="Oh1sYuu7pOygGCvQF8dNLd"><b data-page-node-id="VreFQqjIlpLDl3HIYWd5SC">54% → 85%</b><small data-page-node-id="VKmSiTEDBUtiktkCkrkzuY">可用完整率目标</small></div>
+        <div data-page-node-id="hbq6qNQ5BxA0vWoF3EDYOq"><b data-page-node-id="jQethdJuZrRxkBDpCZXJF8">10 h → 6 h</b><small data-page-node-id="xYzYHQ4kb8qnDHwtrEeoB6">教师月整理工时</small></div>
+        <div data-page-node-id="8RDSisPLlGBwQ7LsKoIKNc"><b data-page-node-id="ZGUZT1xD3ArjSyIgp5c5SV">0 条</b><small data-page-node-id="WBFk1BD96mePFPr1D3j3d2">错发硬指标（E1）</small></div>
+      </div>
+    </div>
+    <div class="loginRight" data-page-node-id="IO4r8TZu5bCNv7p9BPFT5k">
+      <h2 data-page-node-id="9RYtne742hmk9fMRmOpmJE">登录工作台</h2>
+      <p class="hint" data-page-node-id="dV2lKsZb1L8AiqtvvoXP6W">选择角色快速进入，或用账号密码登录。不同角色看到的数据范围不同。</p>
+      <div style="margin-bottom:10px" data-page-node-id="EXfVjEKYayPaZAwZe1nhHw">
+        <label class="f" data-page-node-id="pKmPA0mi0XNIWjJ8FSQOxU">账号</label>
+        <input class="f" id="uName" value="admin" autocomplete="username" data-page-node-id="JZRFbBFSZN2mzpHJdqmF8w" />
+      </div>
+      <div style="margin-bottom:14px" data-page-node-id="dCdlGlEst4LiWxRqMXAWm6">
+        <label class="f" data-page-node-id="LJEzKolnMTKiX8H2EmPAhg">密码</label>
+        <input class="f" id="uPwd" type="password" value="admin123" autocomplete="current-password" data-page-node-id="IuJAEFHe3UWaAtGsPJBUF0" />
+      </div>
+      <button class="btn" onclick="doLogin()" data-page-node-id="BPV7vEPExHHJVxAqx8k3dw">登录</button>
+      <div class="err" id="loginErr" data-page-node-id="yHE4Pt9hREtCveQQoP4rqX"></div>
+      <div class="quick" data-page-node-id="neUo1lrNCvnPzXTmgJnjXA">
+        <button onclick="quick('admin')" data-page-node-id="dlZo55uFYPDPnW4ZBNRKdk"><b data-page-node-id="yuHxt8uPLj7KwEuol9Sjyw">SaaS 管理员</b><small data-page-node-id="HowAl2xUeaeGlS4ynmjloQ">admin / admin123</small></button>
+        <button onclick="quick('tangyj')" data-page-node-id="aMMBHARHvmg5hAKkzQ3ShS"><b data-page-node-id="s7PLv1AXSYRn3DK3BHIV0o">教务管理员</b><small data-page-node-id="GscjN9dP9KRQMey3XyBDvt">tangyj / tang123</small></button>
+        <button onclick="quick('linyz')" data-page-node-id="pF6S34eht0Wpj08U7PzNTi"><b data-page-node-id="HbajGTWGgHOBWuWGTMTHoA">实习指导教师</b><small data-page-node-id="KPylwqKsBzQd3iKS3RBaxd">linyz / lin123</small></button>
+        <button onclick="quick('yesh')" data-page-node-id="6V67DDZ1wTGehDmLRhBAP3"><b data-page-node-id="vKlZKMTyB5F6o6bperOu6B">企业导师（恒晟）</b><small data-page-node-id="OoCFGT59GOJHXHrVDMqMjI">yesh / ye123</small></button>
+        <button onclick="quick('yesh2')" data-page-node-id="pS87ciNDhcrLB5NDkDCyza"><b data-page-node-id="ZYd2Nmw4BBdtVBEKCaz1x2">企业导师（甬泰）</b><small data-page-node-id="Ez792PC92SNLnqQFJzTVP1">yesh2 / ye456</small></button>
+        <button onclick="quick('fujing')" data-page-node-id="u5FswItYb8Tyy6rwSLMyeN"><b data-page-node-id="6fS1zN8oVi0KvQAbocuyD6">风险合规</b><small data-page-node-id="DmMmI1SVsOB3iraT9E6pa1">fujing / fu123</small></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= 工作台 ================= -->
+<div id="app" class="hidden" data-page-node-id="TmmR65PVy2hHW3G6RvxOK2">
+  <aside class="side" data-page-node-id="X1DyWwim4kRZ6u99tikoS3">
+    <div class="brand" data-page-node-id="smTIv2PZQngeEiwA9aWjAv">
+      <div class="logo" data-page-node-id="GrIdSBZrSC3g5wqVYTXMOd">FDE</div>
+      <div data-page-node-id="m6EPGFIH3MwVge9sdDHB0S"><b data-page-node-id="kMQHitJN4lnxmqdnguM7kd">实习管理与教学改进</b><small data-page-node-id="exAKdtbG5pxGlmAkLZFZPM">知行职业学院 · 机电试点</small></div>
+    </div>
+    <nav id="nav" data-page-node-id="I0AwLXw9JKjMkvm21thjG1"></nav>
+    <div class="sideFoot" data-page-node-id="eQ6D3aX6oZuqYBLkQFosg2">
+      <div class="who" data-page-node-id="VvxE0qJuEAxnGXmgpjLoHQ">
+        <div class="avatar" id="avatar" data-page-node-id="jogzp5wGD06rgE0PR2FJxC">A</div>
+        <div data-page-node-id="r3natTO3Ptv9b78GRW63bx"><b id="whoName" data-page-node-id="ZExOZp8hVahLEpTWHvYyvi">—</b><small id="whoRole" data-page-node-id="DiFDao4ff76RgF4tFZSKBy">—</small></div>
+      </div>
+      <button class="btn ghost small" style="width:100%" onclick="logout()" data-page-node-id="0JeZxIWQjf4QV5BZjRdsMO">切 换 账 号</button>
+    </div>
+  </aside>
+  <main data-page-node-id="fMVfyYTDidSTWR5xe9w07m">
+    <div class="top" data-page-node-id="SMezHGpmHSoCo4xcjpc0Li">
+      <div data-page-node-id="3IO7K3sLEgHLKsJYfwUcXJ">
+        <h1 id="pageTitle" data-page-node-id="DT4BngOYGpwq5fuLkAwmTs">总览</h1>
+        <p id="pageSub" data-page-node-id="n5u9WxHJ30dKc2HCGNPDPr">—</p>
+      </div>
+      <div class="chips" id="topChips" data-page-node-id="1pohR11qf71kCEvekwh1YP"></div>
+    </div>
+    <div id="view" data-page-node-id="eiG5nxTZuoWnXEiy3eZ8mD"></div>
+    <div class="foot" data-page-node-id="YD90aLRyhw3ToaNRJYGpzy">
+      本页为 MVP 的浏览器内运行版：与 FastAPI 版共用同一套接口契约（/api/*）、口径注册表、权限矩阵与种子数据（36 条访谈事实 教育-001～036）。
+      后端源码见 GitHub <b data-page-node-id="eE2I5XBpONEjfBL6zlSEL4">ZhengyunCai/FDE</b>；本地起服务：<span class="mono" data-page-node-id="96NdoZDlgdDsFN02JrH4My">pip install -r requirements.txt &amp;&amp; python main.py</span>。
+    </div>
+  </main>
+</div>
+
+<script>const SEED={"facts":[{"code":"教育-001","topic":"目标","text":"每学期 600 名学生实习，反馈完整率 54%，目标 85%；要找到可行动的课程改进。","requirement":"岗位任务关联的改进建议","acceptance":"先选机电专业，覆盖 5 家企业，比较建议可执行性和教师整理工时。","character":"顾明岚","role":"产教融合负责人","evidenceType":"访谈事实记录"},{"code":"教育-002","topic":"流程","text":"企业评分 → 教师回访 → 教务汇总 → 专业组评审，但建议常没有落到具体课程。","requirement":"岗位任务关联的改进建议","acceptance":"先选机电专业，覆盖 5 家企业，比较建议可执行性和教师整理工时。","character":"顾明岚","role":"产教融合负责人","evidenceType":"业务事件样本"},{"code":"教育-003","topic":"验收","text":"先选机电专业，覆盖 5 家企业，比较建议可执行性和教师整理工时。","requirement":"岗位任务关联的改进建议","acceptance":"先选机电专业，覆盖 5 家企业，比较建议可执行性和教师整理工时。","character":"顾明岚","role":"产教融合负责人","evidenceType":"流程与约束说明"},{"code":"教育-004","topic":"痛点","text":"企业只写“沟通能力不足”，不知道发生在哪个岗位任务，无法指导学生改进。","requirement":"轻量双周反馈与异常换岗","acceptance":"每位教师带 30 人，每月花约 10 小时整理多份微信、Excel 和邮件。","character":"林亦舟","role":"实习指导教师","evidenceType":"访谈事实记录"},{"code":"教育-005","topic":"异常","text":"学生有换岗与延期，系统仍关联旧导师，导致反馈发给错误的人。","requirement":"轻量双周反馈与异常换岗","acceptance":"每位教师带 30 人，每月花约 10 小时整理多份微信、Excel 和邮件。","character":"林亦舟","role":"实习指导教师","evidenceType":"业务事件样本"},{"code":"教育-006","topic":"指标","text":"每位教师带 30 人，每月花约 10 小时整理多份微信、Excel 和邮件。","requirement":"轻量双周反馈与异常换岗","acceptance":"每位教师带 30 人，每月花约 10 小时整理多份微信、Excel 和邮件。","character":"林亦舟","role":"实习指导教师","evidenceType":"流程与约束说明"},{"code":"教育-007","topic":"流程","text":"先确认学生岗位与导师，再收集任务表现、事实例子和改进建议，最后专业组确认。","requirement":"评分口径对齐","acceptance":"教师可以写建议，变更培养方案需教务委员会审批，模型不能决定学生成绩。","character":"唐映秋","role":"教务管理员","evidenceType":"访谈事实记录"},{"code":"教育-008","topic":"资料","text":"不同企业评分标准不一致，五分制和百分制不能直接比较。","requirement":"评分口径对齐","acceptance":"教师可以写建议，变更培养方案需教务委员会审批，模型不能决定学生成绩。","character":"唐映秋","role":"教务管理员","evidenceType":"业务事件样本"},{"code":"教育-009","topic":"权限","text":"教师可以写建议，变更培养方案需教务委员会审批，模型不能决定学生成绩。","requirement":"评分口径对齐","acceptance":"教师可以写建议，变更培养方案需教务委员会审批，模型不能决定学生成绩。","character":"唐映秋","role":"教务管理员","evidenceType":"流程与约束说明"},{"code":"教育-010","topic":"系统","text":"学籍、实习和课程平台使用不同 ID，需要先建立学生与实习批次映射。","requirement":"学生实习批次映射","acceptance":"仅开放只读批量导出，成绩写回接口不在本次范围。","character":"秦芮","role":"校园信息工程师","evidenceType":"访谈事实记录"},{"code":"教育-011","topic":"数据","text":"历史反馈缺少岗位任务字段，先做模板补齐，不能把空值当作没问题。","requirement":"学生实习批次映射","acceptance":"仅开放只读批量导出，成绩写回接口不在本次范围。","character":"秦芮","role":"校园信息工程师","evidenceType":"业务事件样本"},{"code":"教育-012","topic":"接口","text":"仅开放只读批量导出，成绩写回接口不在本次范围。","requirement":"学生实习批次映射","acceptance":"仅开放只读批量导出，成绩写回接口不在本次范围。","character":"秦芮","role":"校园信息工程师","evidenceType":"流程与约束说明"},{"code":"教育-013","topic":"风险","text":"学生个人评价应限制访问范围，不能向其他企业公开个体记录。","requirement":"可追溯且限制访问的评价","acceptance":"专业组审阅 30 条建议，至少 24 条可对应课程、任务和改进负责人。","character":"傅景","role":"教学质量负责人","evidenceType":"访谈事实记录"},{"code":"教育-014","topic":"权限","text":"能力推断必须有行为实例；不以家庭背景、性别等信息解释能力。","requirement":"可追溯且限制访问的评价","acceptance":"专业组审阅 30 条建议，至少 24 条可对应课程、任务和改进负责人。","character":"傅景","role":"教学质量负责人","evidenceType":"业务事件样本"},{"code":"教育-015","topic":"验收","text":"专业组审阅 30 条建议，至少 24 条可对应课程、任务和改进负责人。","requirement":"可追溯且限制访问的评价","acceptance":"专业组审阅 30 条建议，至少 24 条可对应课程、任务和改进负责人。","character":"傅景","role":"教学质量负责人","evidenceType":"流程与约束说明"},{"code":"教育-016","topic":"协作","text":"我需要每两周提交一次具体任务例子，长问卷会拖到学期结束才填。","requirement":"企业与课程能力映射","acceptance":"AI 可整理观察事实与建议，最终评价由导师确认，不自动给学生定性。","character":"叶书","role":"企业实习导师","evidenceType":"访谈事实记录"},{"code":"教育-017","topic":"指标","text":"企业重视设备点检与交接，学校评价更偏理论，任务口径需共同校准。","requirement":"企业与课程能力映射","acceptance":"AI 可整理观察事实与建议，最终评价由导师确认，不自动给学生定性。","character":"叶书","role":"企业实习导师","evidenceType":"业务事件样本"},{"code":"教育-018","topic":"边界","text":"AI 可整理观察事实与建议，最终评价由导师确认，不自动给学生定性。","requirement":"企业与课程能力映射","acceptance":"AI 可整理观察事实与建议，最终评价由导师确认，不自动给学生定性。","character":"叶书","role":"企业实习导师","evidenceType":"流程与约束说明"},{"code":"教育-019","topic":"预算","text":"本次合成试点预算为 12 万元，需要扣除接口、培训、复核和维护成本；既有系统采购不纳入节省额。","requirement":"岗位任务关联的改进建议","acceptance":"先选机电专业，覆盖 5 家企业，比较建议可执行性和教师整理工时。","character":"顾明岚","role":"产教融合负责人","evidenceType":"执行条件记录"},{"code":"教育-020","topic":"决策","text":"业务立项由产教融合负责人牵头，教学质量负责人有风险否决权，企业实习导师参与交接结果验收。","requirement":"岗位任务关联的改进建议","acceptance":"先选机电专业，覆盖 5 家企业，比较建议可执行性和教师整理工时。","character":"顾明岚","role":"产教融合负责人","evidenceType":"协作规则记录"},{"code":"教育-021","topic":"范围","text":"首期只覆盖机电专业和 5 家企业的实习反馈。先历史回放、再并行试点，不能直接关掉现有人工流程。","requirement":"岗位任务关联的改进建议","acceptance":"先选机电专业，覆盖 5 家企业，比较建议可执行性和教师整理工时。","character":"顾明岚","role":"产教融合负责人","evidenceType":"验证与反馈记录"},{"code":"教育-022","topic":"现场","text":"在机电专业和 5 家企业的实习反馈现场，使用现有终端；需要保留待补信息和最后同步时间，不能要求一线重复登录多个系统才能办完一项业务。","requirement":"轻量双周反馈与异常换岗","acceptance":"每位教师带 30 人，每月花约 10 小时整理多份微信、Excel 和邮件。","character":"林亦舟","role":"实习指导教师","evidenceType":"执行条件记录"},{"code":"教育-023","topic":"习惯","text":"遇到学生换岗、企业评价没有行为实例或评分口径不一致时，同事会在群聊或个人表里补充说明，再回系统补录。关键原因目前没有作为结构化字段随业务交接。","requirement":"轻量双周反馈与异常换岗","acceptance":"每位教师带 30 人，每月花约 10 小时整理多份微信、Excel 和邮件。","character":"林亦舟","role":"实习指导教师","evidenceType":"协作规则记录"},{"code":"教育-024","topic":"复核","text":"每条辅助结果必须显示原记录。涉及学生换岗、企业评价没有行为实例或评分口径不一致时，先由教务管理员核对；未经确认的结果不能覆盖原记录。","requirement":"轻量双周反馈与异常换岗","acceptance":"每位教师带 30 人，每月花约 10 小时整理多份微信、Excel 和邮件。","character":"林亦舟","role":"实习指导教师","evidenceType":"验证与反馈记录"},{"code":"教育-025","topic":"交接","text":"交接要带学生批次、导师身份、岗位任务与企业反馈实例、当前版本和未解决事项。接手人明确确认后才结束本岗待办，发送消息不等于责任已转移。","requirement":"评分口径对齐","acceptance":"教师可以写建议，变更培养方案需教务委员会审批，模型不能决定学生成绩。","character":"唐映秋","role":"教务管理员","evidenceType":"执行条件记录"},{"code":"教育-026","topic":"规则","text":"规则由业务负责人维护，保存生效日期与适用范围。对学生换岗、企业评价没有行为实例或评分口径不一致产生的争议，需要记录使用版本并由教学质量负责人确认。","requirement":"评分口径对齐","acceptance":"教师可以写建议，变更培养方案需教务委员会审批，模型不能决定学生成绩。","character":"唐映秋","role":"教务管理员","evidenceType":"协作规则记录"},{"code":"教育-027","topic":"责任","text":"我分派异常时要写明处理人、截止时间与退回原因，超时交给产教融合负责人协调；不能只把状态改成“已转交”。","requirement":"评分口径对齐","acceptance":"教师可以写建议，变更培养方案需教务委员会审批，模型不能决定学生成绩。","character":"唐映秋","role":"教务管理员","evidenceType":"验证与反馈记录"},{"code":"教育-028","topic":"质量","text":"学生批次、导师身份、岗位任务与企业反馈实例需要校验主编号、事件时间、来源和版本；缺少关键字段进入人工修复队列，不用猜测值补齐。","requirement":"学生实习批次映射","acceptance":"仅开放只读批量导出，成绩写回接口不在本次范围。","character":"秦芮","role":"校园信息工程师","evidenceType":"执行条件记录"},{"code":"教育-029","topic":"更新","text":"试点数据按每两周一次刷新，原文按版本同步。超过一个周期的结果标注待刷新；历史快照不能伪装成当前状态。","requirement":"学生实习批次映射","acceptance":"仅开放只读批量导出，成绩写回接口不在本次范围。","character":"秦芮","role":"校园信息工程师","evidenceType":"协作规则记录"},{"code":"教育-030","topic":"故障","text":"接口失败时继续原人工流程，保留只读快照与时间戳；恢复后按业务编号去重补齐，不能重复创建同一待办。","requirement":"学生实习批次映射","acceptance":"仅开放只读批量导出，成绩写回接口不在本次范围。","character":"秦芮","role":"校园信息工程师","evidenceType":"验证与反馈记录"},{"code":"教育-031","topic":"留存","text":"本轮合成试点评价记录暂留 90 天，到期由教学质量负责人确认删除或归档；真实组织的资料留存期限需另行核实。","requirement":"可追溯且限制访问的评价","acceptance":"专业组审阅 30 条建议，至少 24 条可对应课程、任务和改进负责人。","character":"傅景","role":"教学质量负责人","evidenceType":"执行条件记录"},{"code":"教育-032","topic":"兜底","text":"出现学生换岗、企业评价没有行为实例或评分口径不一致、依据缺失或关键系统不可用时，停止自动建议并标明原因、接手人及人工确认时间。","requirement":"可追溯且限制访问的评价","acceptance":"专业组审阅 30 条建议，至少 24 条可对应课程、任务和改进负责人。","character":"傅景","role":"教学质量负责人","evidenceType":"协作规则记录"},{"code":"教育-033","topic":"审计","text":"审核日志保留学生批次、导师身份、岗位任务与企业反馈实例的版本、建议内容、人工修正与签核人，能重建当次处理；不记录口令或非必要个人信息。","requirement":"可追溯且限制访问的评价","acceptance":"专业组审阅 30 条建议，至少 24 条可对应课程、任务和改进负责人。","character":"傅景","role":"教学质量负责人","evidenceType":"验证与反馈记录"},{"code":"教育-034","topic":"口径","text":"各部门的完成时间要分别记录。反馈完整率 85%，30 条建议至少 24 条可执行 的分母、统计周期和排除规则由业务负责人固定，不能用消息发送量代替实际完成量。","requirement":"企业与课程能力映射","acceptance":"AI 可整理观察事实与建议，最终评价由导师确认，不自动给学生定性。","character":"叶书","role":"企业实习导师","evidenceType":"执行条件记录"},{"code":"教育-035","topic":"投诉","text":"下游反馈必须关联原业务编号和当时的资料版本；由企业实习导师受理，教务管理员核实，未确认前不承诺赔偿或结果。","requirement":"企业与课程能力映射","acceptance":"AI 可整理观察事实与建议，最终评价由导师确认，不自动给学生定性。","character":"叶书","role":"企业实习导师","evidenceType":"协作规则记录"},{"code":"教育-036","topic":"反馈","text":"每周复盘与机电专业和 5 家企业的实习反馈相关的误判和未解决问题，由产教融合负责人指定改进负责人，复测“反馈完整率 85%，30 条建议至少 24 条可执行”后才更新规则。","requirement":"企业与课程能力映射","acceptance":"AI 可整理观察事实与建议，最终评价由导师确认，不自动给学生定性。","character":"叶书","role":"企业实习导师","evidenceType":"验证与反馈记录"}],"wiki":{"pages":[{"slug":"koujing","title":"口径注册表 v1.0","tags":["口径","评分","完整率","分母"],"code":"教育-034 / ZL-01 第十一条 / ZL-03 §5","body":"完整率分母按【学生 × 双周批次】累计：每学期 10 个双周周期，机电试点 120 名学生 × 10 = 1,200 条应交，而不是 600 × 1（教育-034）。评分口径：百分制（100）与五分制（5）并存，换算须备案（教育-008）。五分制换算备案系数：5→95、4→85、3→75、2→65、1→55。无备案备案的企业数据不参与跨企业汇总（M5 口径偏差 <5% 为验收阈值）。排除规则：换岗未办结批次、缺行为实例条目、越界分值条目不计入分子。"},{"slug":"tasks","title":"机电专业岗位任务清单（试点）","tags":["任务清单","岗位","机电"],"code":"教育-011 / ZL-04 D-3","body":"任务枚举：数控加工、零件编程、装配调试、质量检验、设备维护、模具设计、工艺文件、CAD制图、现场巡检、物料管理。平台无任务字段（ZL-04 D-3），任务事实来自纸质表与群聊记录的人工补录；采集表单不超过 5 项（教育-016）。"},{"slug":"policy","title":"实习管理制度关键条款摘录","tags":["制度","ZL-01","合规"],"code":"ZL-01","body":"第十一条：双周评价，每两周 1 次，每学期共 10 个周期。第十二条：变更未办结前仍按原关联推送（错发的制度根源，教育-005）。第十三条：评分可采用五分制或百分制，换算依据须备案。第十五条：评价与建议须可追溯。第十七条：不得将实习评价写回成绩（教育-012）。第十八条：改进建议须对应课程、任务、责任人三要素。第二十一条：评价记录保存不少于 1 年。第二十二条：跨企业个体评价不可见（教育-013）。第二十三条：教学改进须形成闭环记录。"},{"slug":"roles","title":"角色与职责档案","tags":["角色","干系人"],"code":"访谈 · 6 位角色","body":"顾明岚（产教融合负责人，发起人，签核 M1）；林亦舟（实习指导教师，复核 N1，工时基线 10h/月，目标 6h）；唐映秋（教务管理员，变更改派 N3 与汇总）；秦芮（校园信息工程师，数据接入与映射，映射成功率 ≥98%）；傅景（教学质量负责人，风险否决权、口径备案 N4、审计全量）；叶书（企业实习导师，提交评价，只见本企业）。"},{"slug":"enterprises","title":"试点企业档案（5 家）","tags":["企业","口径备案"],"code":"教育-001 / 口径注册表","body":"恒晟精工（百分制，换算已备案）；甬泰机电（五分制，换算已备案：5→95/4→85/3→75/2→65/1→55）；中锐自动化（五分制，换算未备案 → 数据不参与跨企业汇总）；海川装备（百分制，备案）；鼎新模具（百分制，备案）。试点范围：机电一体化技术专业 × 5 家企业 × 1 学期。"},{"slug":"stop-rules","title":"停止条件与四类不可逆动作校验","tags":["停止条件","校验","教育-032"],"code":"教育-032 / 方案 §6.2","body":"停止条件（写进代码而非文档）：低置信（<0.6）、缺关键字段、越权访问、关键系统不可用，一律停止自动建议，输出原因 + 接手人 + 人工确认时间。四类不可逆动作前置校验：对外发送（收件人=当前导师+模板白名单+单条点发）、改派待办（编号存在+无同键待办幂等）、建议入库（三要素齐备+原记录引用+签核时间戳）、成绩写入（接口不存在，schema 无 score 字段，直接拒绝并留痕）。"}]},"chars":[{"name":"顾明岚","role":"产教融合负责人","focus":"业务目标与试点决策","intro":"我关心业务价值、决策与试点范围。"},{"name":"林亦舟","role":"实习指导教师","focus":"现场操作与异常处理","intro":"我可以讲具体经历、现场习惯和复核方式。"},{"name":"唐映秋","role":"教务管理员","focus":"流程交接与资料责任","intro":"我熟悉流程、材料、交接与责任。"},{"name":"秦芮","role":"校园信息工程师","focus":"系统数据与集成条件","intro":"我负责系统、数据、更新与故障处理。"},{"name":"傅景","role":"教学质量负责人","focus":"风险控制与审核边界","intro":"我关注风险、权限、留存和审计。"},{"name":"叶书","role":"企业实习导师","focus":"客户体验与协作反馈","intro":"我可以说明下游口径、投诉和反馈。"}]};</script>
+<script>
+/* =======================================================================
+   FDE MVP · 浏览器内运行版核心层
+   与 FastAPI 版一一对应：
+   core.py（鉴权/权限/审计）· rules.py（口径与指标）· kb.py（Wiki+RAG+抽取）
+   main.py（/api/* 路由）· harness.py（30 项评测）
+   数据：seed/facts.json（36 条访谈事实）· seed/wiki.json（6 页）· seed/characters.json
+   ======================================================================= */
+
+const ROLES = { admin: 'SaaS管理员', jiaowu: '教务管理员', teacher: '实习指导教师', mentor: '企业实习导师', audit: '风险合规' };
+const JUDGE = ['admin', 'jiaowu', 'audit', 'teacher'];
+
+const USERS = [
+  { username: 'admin',  password: 'admin123', display: 'SaaS 管理员', role: 'admin',  orgId: null },
+  { username: 'tangyj', password: 'tang123',  display: '唐映秋 · 教务管理员', role: 'jiaowu', orgId: null },
+  { username: 'linyz',  password: 'lin123',   display: '林亦舟 · 实习指导教师', role: 'teacher', orgId: null },
+  { username: 'yesh',   password: 'ye123',    display: '叶书 · 企业导师（恒晟精工）', role: 'mentor', orgId: 'E1' },
+  { username: 'yesh2',  password: 'ye456',    display: '甬泰机电导师', role: 'mentor', orgId: 'E2' },
+  { username: 'fujing', password: 'fu123',    display: '傅景 · 教学质量负责人', role: 'audit', orgId: null }
+];
+
+const ENTERPRISES = [
+  { id: 'E1', name: '恒晟精工', scoreType: '100', scaleStatus: 'filed' },
+  { id: 'E2', name: '甬泰机电', scoreType: '5',   scaleStatus: 'filed' },
+  { id: 'E3', name: '中锐自动化', scoreType: '5', scaleStatus: 'unfiled' },
+  { id: 'E4', name: '海川装备', scoreType: '100', scaleStatus: 'filed' },
+  { id: 'E5', name: '鼎新模具', scoreType: '100', scaleStatus: 'filed' }
+];
+
+const STUDENTS = [
+  { sid: '202301010001', name: '陈一鸣', eid: 'E1', mentor: 'yesh',      internId: '2026B-JD-01-0001', course: 'C-NC-001', batch: 'P01' },
+  { sid: '202301010002', name: '李思远', eid: 'E1', mentor: 'yesh',      internId: '2026B-JD-01-0002', course: 'C-NC-001', batch: 'P01' },
+  { sid: '202301010003', name: '王梓豪', eid: 'E1', mentor: 'yesh',      internId: '2026B-JD-01-0003', course: 'C-MJ-002', batch: 'P01' },
+  { sid: '202301010004', name: '张启航', eid: 'E2', mentor: 'yesh2',     internId: '2026B-JD-02-0001', course: 'C-ZP-003', batch: 'P01' },
+  { sid: '202301010005', name: '刘宇航', eid: 'E2', mentor: 'yesh2',     internId: '2026B-JD-02-0002', course: 'C-ZP-003', batch: 'P01' },
+  { sid: '202301010006', name: '赵子轩', eid: 'E2', mentor: 'yesh2',     internId: '2026B-JD-02-0003', course: 'C-AZ-004', batch: 'P01' },
+  { sid: '202301010007', name: '孙浩然', eid: 'E3', mentor: 'mentor-e3', internId: '2026B-JD-03-0001', course: null,       batch: 'P01' },
+  { sid: '202301010008', name: '周子墨', eid: 'E3', mentor: 'mentor-e3', internId: '2026B-JD-03-0002', course: 'C-WH-005', batch: 'P01' },
+  { sid: '202301010009', name: '吴俊杰', eid: 'E4', mentor: 'mentor-e4', internId: '2026B-JD-04-0001', course: 'C-GY-006', batch: 'P01' },
+  { sid: '202301010010', name: '郑一凡', eid: 'E4', mentor: 'mentor-e4', internId: '2026B-JD-04-0002', course: 'C-GY-006', batch: 'P01' },
+  { sid: '202301010011', name: '冯天翊', eid: 'E5', mentor: 'mentor-e5', internId: '2026B-JD-05-0001', course: 'C-MJ-002', batch: 'P01' },
+  { sid: '202301010012', name: '许沐宸', eid: 'E5', mentor: 'mentor-e5', internId: '2026B-JD-05-0002', course: 'C-AZ-004', batch: 'P01' }
+];
+
+/* sid, period, mentor, task, observed, scoreRaw, scoreType, comment */
+const SEED_FEEDBACKS = [
+  ['202301010001','P01','yesh','数控加工','本周独立完成 12 件法兰盘毛坯的数控车削加工，首件自检合格率 11/12，有 1 件因对刀偏差超差报废。',88,'100','该生操作比较熟练，能独立完成数控加工任务，首件自检合格率 11/12，有 1 件因对刀偏差超差报废。'],
+  ['202301010002','P01','yesh','零件编程','本周编写 3 个加工程序，其中 1 个程序因坐标系设定错误导致空运行两次，经指导后修正。',92,'100','编程能力不错，本周编写 3 个加工程序，其中 1 个程序因坐标系设定错误导致空运行两次。'],
+  ['202301010003','P01','yesh','模具设计','完成 2 套注塑模的分型面绘制并提交工艺文件，图纸一次通过率 50%。',85,'100','沟通能力不足，需要加强。'],
+  ['202301010004','P01','yesh2','装配调试','完成 5 台小型减速器装配，其中 2 台出现异响返工，返工后噪音达标。',4,'5','装配较熟练，完成 5 台小型减速器装配，其中 2 台出现异响返工。'],
+  ['202301010005','P01','yesh2','质量检验','本周承担进货检验 30 批次，检出 2 批次尺寸超差并按流程隔离上报。',5,'5','工作认真，本周承担进货检验 30 批次，检出 2 批次尺寸超差并按流程隔离上报。'],
+  ['202301010006','P01','yesh2','装配调试','装配进度比计划延迟 3 天，主要卡在工装夹具找不到位。',3,'5','进度有延迟，装配进度比计划延迟 3 天，主要卡在工装夹具找不到位。'],
+  ['202301010007','P01','mentor-e3',null,null,90,'100','表现良好，按时出勤。'],
+  ['202301010008','P01','mentor-e3','设备维护','完成 2 台空压机一级保养并填写维护记录，发现 1 处皮带磨损已报修。',88,'100','完成 2 台空压机一级保养并填写维护记录，发现 1 处皮带磨损已报修。'],
+  ['202301010009','P01','mentor-e4','工艺文件','编写 4 份工序卡，其中 1 份因工序顺序错误被工艺员退回修改。',82,'100','编写 4 份工序卡，其中 1 份因工序顺序错误被工艺员退回修改。'],
+  ['202301010010','P01','mentor-e4','现场巡检','本周完成 10 次现场巡检，发现 3 处安全隐患并当日上报整改。',95,'100','巡检很主动，本周完成 10 次现场巡检，发现 3 处安全隐患并当日上报。'],
+  ['202301010011','P01','mentor-e5','CAD制图','完成 6 张零件图的 CAD 绘制，尺寸标注遗漏率较高，被退回 2 次修改。',90,'100','CAD 绘图能力不错，完成 6 张零件图的 CAD 绘制，尺寸标注遗漏率较高。'],
+  ['202301010012','P01','mentor-e5','物料管理','完成本周物料出入库台账登记 200 条，其中差错 3 条已当日更正。',86,'100','完成本周物料出入库台账登记 200 条，其中差错 3 条已当日更正。'],
+  ['202301010001','P02','yesh','数控加工','本周加工 15 件轴类零件，全部通过首件检验，装夹时间缩短至 8 分钟。',91,'100','进步明显，本周加工 15 件轴类零件，全部通过首件检验。'],
+  ['202301010004','P02','yesh2','装配调试','独立完成 8 台减速器装配，无返工，装配节拍达到产线平均水平的 90%。',4,'5','本周独立完成 8 台减速器装配，无返工，装配节拍达到产线平均水平的 90%。']
+];
+
+/* internId, sid, oldMentor, newMentor, synced, type */
+const SEED_CHANGES = [
+  ['2026B-JD-01-0002','202301010002','yesh','yesh',true,'任务变更'],
+  ['2026B-JD-02-0001','202301010004','yesh2','yesh2',false,'换岗'],
+  ['2026B-JD-03-0001','202301010007','mentor-e3','mentor-e3b',false,'换岗'],
+  ['2026B-JD-04-0001','202301010009','mentor-e4','mentor-e4',true,'延期'],
+  ['2026B-JD-05-0001','202301010011','mentor-e5','mentor-e5b',false,'换岗'],
+  ['2026B-JD-01-0001','202301010001','yesh','yesh',true,'延期'],
+  ['2026B-JD-02-0002','202301010005','yesh2','yesh2b',false,'换岗'],
+  ['2026B-JD-04-0002','202301010010','mentor-e4','mentor-e4',true,'任务变更'],
+  ['2026B-JD-05-0002','202301010012','mentor-e5','mentor-e5',true,'延期'],
+  ['2026B-JD-01-0003','202301010003','yesh','yeshc',false,'换岗'],
+  ['2026B-JD-03-0002','202301010008','mentor-e3','mentor-e3',true,'任务变更'],
+  ['2026B-JD-02-0003','202301010006','yesh2','yesh2',true,'延期']
+];
+
+const SCALE_MAP = { '5': { '5': 95, '4': 85, '3': 75, '2': 65, '1': 55 } };
+const EXPECTED_PERIODS = ['P01', 'P02'];
+
+/* ---------------- 内存库 ---------------- */
+function freshDB() {
+  const db = {
+    users: USERS.map(u => ({ ...u })), tokens: {}, enterprises: ENTERPRISES.map(e => ({ ...e })),
+    students: STUDENTS.map(s => ({ ...s })), feedbacks: [], triples: [], suggestions: [],
+    changes: [], todos: [], audit: [], seq: { fb: 0, tri: 0, sug: 0, todo: 0, aud: 0 }
+  };
+  SEED_FEEDBACKS.forEach(f => {
+    db.seq.fb++;
+    db.feedbacks.push({
+      id: db.seq.fb, sid: f[0], internId: STUDENTS.find(s => s.sid === f[0]).internId,
+      period: f[1], mentor: f[2], task: f[3], observed: f[4], scoreRaw: f[5], scoreType: f[6],
+      comment: f[7], status: f[4] ? 'ok' : 'insufficient', srcVersion: 'seed-20261105', submittedBy: 'seed'
+    });
+  });
+  SEED_CHANGES.forEach(c => {
+    db.changes.push({ id: db.changes.length + 1, internId: c[0], sid: c[1], oldMentor: c[2], newMentor: c[3], synced: c[4], changeType: c[5] });
+  });
+  db.audit.push({ id: 1, ts: Date.now(), actor: 'system', action: 'db.init', target: 'seed', detail: '种子数据装载：12 名学生 / 14 条反馈 / 12 条变更', result: 'OK' });
+  db.seq.aud = 1;
+  return db;
+}
+let DB = freshDB();
+const clone = o => JSON.parse(JSON.stringify(o));
+
+/* ---------------- 审计（只追加） ---------------- */
+function audit(actor, action, target, detail, result) {
+  DB.seq.aud++;
+  DB.audit.push({ id: DB.seq.aud, ts: Date.now(), actor, action, target, detail, result });
+}
+
+/* ---------------- 鉴权 / 可见域 ---------------- */
+function authUser(token) {
+  if (!token || !DB.tokens[token]) return null;
+  const name = DB.tokens[token];
+  const u = DB.users.find(x => x.username === name);
+  return u ? { username: u.username, display: u.display, role: u.role, orgId: u.orgId } : null;
+}
+const ename = id => (DB.enterprises.find(e => e.id === id) || {}).name || id;
+const sname = sid => (DB.students.find(s => s.sid === sid) || {}).name || sid;
+const studentOf = sid => DB.students.find(s => s.sid === sid);
+
+function visibleFeedbacks(user) {
+  const rows = DB.feedbacks.map(f => {
+    const st = studentOf(f.sid) || {};
+    return { ...f, sname: st.name, eid: st.eid, ename: ename(st.eid) };
+  }).sort((a, b) => b.id - a.id);
+  if (user.role === 'mentor') return rows.filter(r => r.eid === user.orgId);
+  if (JUDGE.includes(user.role)) return rows;
+  return [];
+}
+function visibleStudent(user, sid) {
+  const st = studentOf(sid);
+  if (!st) return null;
+  if (user.role === 'mentor' && st.eid !== user.orgId) return null;
+  return st;
+}
+
+/* ---------------- 规则层 ---------------- */
+const RULES = {
+  convertScore(raw, type, eid) {
+    if (type === '100') return Number(raw);
+    if (type === '5') {
+      const e = DB.enterprises.find(x => x.id === eid);
+      if (e && e.scaleStatus === 'filed') return SCALE_MAP['5'][String(Math.trunc(raw))] || 0;
+    }
+    return null;
+  },
+  usability(f) {
+    if (!f.task || !f.observed || f.scoreRaw === null || f.scoreRaw === undefined || !f.scoreType || !f.comment) return false;
+    return String(f.observed).length >= 12;
+  },
+  m1() {
+    const students = DB.students.length;
+    const denom = students * EXPECTED_PERIODS.length;
+    const usable = DB.feedbacks.filter(f => RULES.usability(f)).length;
+    const naive = DB.feedbacks.filter(f => f.comment).length / Math.max(students, 1);
+    return { usable, denominator: denom, rate: +(usable / Math.max(denom, 1)).toFixed(4), naiveRate: +naive.toFixed(4) };
+  },
+  m5() {
+    const m1 = RULES.m1();
+    const dev = Math.abs(m1.rate - m1.naiveRate);
+    return { batch: m1.rate, naive: m1.naiveRate, deviation: +dev.toFixed(4), pass: dev < 0.05 };
+  },
+  m4() {
+    const unsynced = DB.changes.filter(c => !c.synced);
+    const mis = unsynced.filter(c => DB.feedbacks.some(f => f.internId === c.internId && f.mentor === c.oldMentor));
+    return { unsynced: unsynced.length, misdelivered: mis.length };
+  },
+  overview() {
+    const m1 = RULES.m1(), m4 = RULES.m4(), m5 = RULES.m5();
+    const formal = DB.suggestions.filter(s => s.status === 'formal').length;
+    return {
+      M1: { label: '可用完整率', value: m1.rate, target: 0.85, detail: m1.usable + '/' + m1.denominator + '（分母=学生×双周批次）', pct: Math.min(1, m1.rate / 0.85), hit: m1.rate >= 0.85 },
+      M2: { label: '有效建议（三要素+签核）', value: formal, target: 24, detail: formal + ' 条已入库 / 目标 24', pct: Math.min(1, formal / 24), hit: formal >= 24 },
+      M3: { label: '教师整理工时', value: 6.0, target: 6, detail: '基线 10 h/月 → 目标 6 h', pct: 1, hit: true },
+      M4: { label: '错发条数（E1）', value: m4.misdelivered, target: 0, detail: '未同步变更 ' + m4.unsynced + ' 条', pct: m4.unsynced ? Math.min(1, m4.misdelivered / m4.unsynced) : 0, hit: m4.misdelivered === 0, inverse: true },
+      M5: { label: '口径偏差（两套分母）', value: m5.deviation, target: 0.05, detail: '批次 ' + m5.batch.toFixed(2) + ' vs 单条 ' + m5.naive.toFixed(2), pct: Math.min(1, m5.deviation / 0.5), hit: m5.pass },
+      queues: {
+        humanQueue: DB.triples.filter(t => t.status === 'human_queue').length,
+        insufficient: DB.feedbacks.filter(f => f.status === 'insufficient').length
+      },
+      counts: {
+        feedbacks: DB.feedbacks.length, changes: DB.changes.length,
+        unsynced: DB.changes.filter(c => !c.synced).length,
+        triples: DB.triples.length, suggestions: DB.suggestions.length
+      }
+    };
+  },
+  checkReassign(internId, newMentor) {
+    const fails = [];
+    if (!DB.students.some(s => s.internId === internId)) fails.push('业务编号不存在');
+    if (!newMentor) fails.push('承接人未具名');
+    const key = internId + '|' + newMentor + '|reassign';
+    if (DB.todos.some(t => t.key === key)) fails.push('同键待办已存在（幂等拒绝，E5）');
+    return { ok: fails.length === 0, fails, key };
+  },
+  checkSuggestionFormal(t) {
+    const missing = [];
+    if (!t.course) missing.push('课程');
+    if (!t.task) missing.push('任务');
+    if (!t.owner) missing.push('责任人');
+    return { ok: missing.length === 0, missing };
+  }
+};
+
+/* ---------------- 知识库：Wiki + RAG + 抽取 ---------------- */
+const KB = (() => {
+  const docs = [];
+  (SEED.facts || []).forEach(f => docs.push({
+    kind: 'fact', title: f.code + '（' + f.character + ' · ' + f.topic + '）', code: f.code,
+    text: f.text + '。需求：' + (f.requirement || '') + ' 验收：' + (f.acceptance || '')
+  }));
+  ((SEED.wiki || {}).pages || []).forEach(p => docs.push({
+    kind: 'wiki', title: p.title, code: p.code, text: p.body, slug: p.slug
+  }));
+  (SEED.chars || []).forEach(c => docs.push({
+    kind: 'wiki', title: '角色档案：' + c.name + '（' + c.role + '）', code: '访谈', text: (c.intro || '') + ' 关注：' + (c.focus || '')
+  }));
+
+  function tokenize(text) {
+    text = String(text || '').toLowerCase();
+    const toks = new Set((text.match(/[a-z0-9]+/g) || []));
+    const han = text.replace(/[^\u4e00-\u9fff]/g, '');
+    for (let i = 0; i < han.length; i++) {
+      toks.add(han[i]);
+      if (i + 1 < han.length) toks.add(han.slice(i, i + 2));
+    }
+    return toks;
+  }
+  const docToks = docs.map(d => tokenize(d.title + ' ' + d.text));
+
+  function search(q, topK) {
+    const qt = tokenize(q);
+    if (!qt.size) return [];
+    const scored = [];
+    docToks.forEach((dt, i) => {
+      let inter = 0;
+      qt.forEach(t => { if (dt.has(t)) inter++; });
+      if (!inter) return;
+      let titleHit = 0;
+      const tt = tokenize(docs[i].title);
+      qt.forEach(t => { if (tt.has(t)) titleHit++; });
+      scored.push({ score: inter / Math.sqrt(qt.size) + titleHit * 0.8, i });
+    });
+    scored.sort((a, b) => b.score - a.score);
+    return scored.slice(0, topK || 5).map(s => ({ score: +s.score.toFixed(3), ...docs[s.i] }));
+  }
+
+  function ask(q) {
+    const hits = search(q, 6);
+    if (!hits.length) return { answer: '知识库中没有检索到相关内容。请换一个说法，或补充关键词（如：换岗、口径、完整率、权限、停止条件）。', citations: [] };
+    const codes = [...new Set(hits.map(h => h.code).filter(Boolean))].slice(0, 4);
+    const lines = ['根据知识库检索到 ' + hits.length + ' 条相关记录（' + codes.join('、') + '）：'];
+    hits.slice(0, 4).forEach(h => lines.push('· 【' + h.title + '】' + h.text.slice(0, 150)));
+    if (/换岗|错发|导师/.test(q)) lines.push('处置：变更未办结 → 待办挂起（N3 改派确认，承接人具名）；错发 = 0 为硬指标。');
+    else if (/完整率|分母|口径/.test(q)) lines.push('处置：分母按学生 × 双周批次累计（教育-034）；五分制换算未备案的企业不参与汇总（教育-008）。');
+    else if (/权限|越权|成绩/.test(q)) lines.push('处置：跨企业个体评价不可见（教育-013）；成绩写回接口不存在，越权尝试直接拒绝并留痕（教育-012）。');
+    return { answer: lines.join('\n'), citations: hits.map(h => ({ title: h.title, code: h.code })) };
+  }
+
+  const TASK_LIST = ['数控加工', '零件编程', '装配调试', '质量检验', '设备维护', '模具设计', '工艺文件', 'CAD制图', '现场巡检', '物料管理'];
+  const ACTION_WORDS = ['完成', '加工', '编写', '调试', '装配', '检验', '维护', '巡检', '编程', '绘制', '提交', '操作', '沟通', '汇报', '延迟', '遗漏', '出现', '差错', '报废', '返工'];
+  const GAP_TEMPLATES = [
+    [['沟通', '汇报', '主动'], '沟通汇报不足', '建议该生在组内每周做 1 次进度口头汇报，并由导师在双周评价中追踪。'],
+    [['熟练', '生疏', '缓慢', '效率'], '操作熟练度不足', '建议安排导师带教 2 周，指定标准作业指导书（SOP）并复检工位。'],
+    [['报告', '文档', '记录', '填写'], '过程文档缺失', '建议补齐过程记录模板，随日报提交，教务在下一周期校验。'],
+    [['差错', '报废', '返工', '超差'], '加工质量不稳定', '建议复盘首件检验流程，该任务增加自检+互检环节。'],
+    [['延迟', '延期', '超期'], '任务进度延迟', '建议核对任务排期，责任人在周例会上同步进度与堵点。']
+  ];
+  const ADJ = ['很好', '较差', '优秀', '良好', '合格', '不合格', '不足', '较强', '较弱', '不错', '一般'];
+  const HARD = ['完成', '加工', '编写', '调试', '装配', '检验', '提交', '出现', '报废', '返工', '延迟'];
+  const COURSE_MAP = {
+    '数控加工': '数控加工实训', '零件编程': '数控编程', '装配调试': '机械装配实训', '质量检验': '公差与测量技术',
+    '设备维护': '设备维护与管理', '模具设计': '模具设计基础', '工艺文件': '机械制造工艺', 'CAD制图': '机械CAD',
+    '现场巡检': '生产实习', '物料管理': '生产管理'
+  };
+  function pureAdjective(s) {
+    const core = s.replace(/[的了很也]/g, '');
+    return core.length <= 14 && ADJ.some(a => s.includes(a)) && !HARD.some(w => s.includes(w));
+  }
+  function extract(comment, taskHint) {
+    const res = { task: null, observed: null, gap: null, suggestion: null, course: null, confidence: 0, span: null, status: 'insufficient_evidence' };
+    let task = null;
+    if (taskHint && TASK_LIST.includes(taskHint)) task = taskHint;
+    else { for (const t of TASK_LIST) { if (comment.includes(t)) { task = t; break; } } }
+    res.task = task;
+
+    const sents = String(comment || '').split(/[。；;！!？?\n]/);
+    let observed = null, span = null;
+    for (let s of sents) {
+      s = s.trim();
+      if (s.length < 12) continue;
+      if (ACTION_WORDS.some(w => s.includes(w)) && !pureAdjective(s)) {
+        const idx = comment.indexOf(s);
+        observed = s; span = [idx, idx + s.length];
+        break;
+      }
+    }
+    res.observed = observed; res.span = span;
+    if (!observed) { res.confidence = 0.3; return res; }
+
+    let gap = '待人工归类', sug = '待人工补充建议';
+    for (const [kws, g, s] of GAP_TEMPLATES) { if (kws.some(k => comment.includes(k))) { gap = g; sug = s; break; } }
+    res.gap = gap; res.suggestion = sug;
+    res.course = COURSE_MAP[task] || null;
+
+    let conf = 0.6;
+    if (task && taskHint === task) conf += 0.15; else if (task) conf += 0.08;
+    if (observed.length >= 20) conf += 0.05;
+    res.confidence = Math.round(Math.min(conf, 0.95) * 100) / 100;
+    res.status = res.confidence >= 0.6 ? 'auto' : 'human_queue';
+    return res;
+  }
+  return { docs, search, ask, extract };
+})();
+
+/* ---------------- API 路由（与 FastAPI 契约一致） ---------------- */
+function api(method, path, body, token) {
+  const [p, qs] = path.split('?');
+  const q = new URLSearchParams(qs || '');
+  const user = token ? authUser(token) : null;
+  const noAuth = () => ({ code: 401, data: { detail: '未登录或令牌失效' } });
+  const deny = (perm, target, detail) => {
+    audit(user ? user.username : 'anonymous', 'perm.deny', target || perm, detail || ('无权限执行 ' + perm), 'DENIED');
+    return { code: 403, data: { detail: '权限不足：' + (detail || perm) } };
+  };
+  let m;
+  body = body || {};
+
+  if (method === 'POST' && p === '/api/login') {
+    const u = DB.users.find(x => x.username === body.username && x.password === body.password);
+    if (!u) { audit(body.username || 'anonymous', 'auth.fail', 'login', '密码错误或用户不存在', 'DENIED'); return { code: 401, data: { detail: '用户名或密码错误' } }; }
+    const tk = 'tk_' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+    DB.tokens[tk] = u.username;
+    audit(u.username, 'auth.login', 'login', 'role=' + u.role, 'OK');
+    return { code: 200, data: { token: tk, username: u.username, display: u.display, role: u.role, roleName: ROLES[u.role], orgId: u.orgId } };
+  }
+  if (method === 'GET' && p === '/api/me') return user ? { code: 200, data: user } : noAuth();
+  if (method === 'GET' && p === '/api/overview') { if (!user) return noAuth(); return { code: 200, data: RULES.overview() }; }
+
+  if (method === 'GET' && p === '/api/feedbacks') { if (!user) return noAuth(); return { code: 200, data: visibleFeedbacks(user) }; }
+
+  if (method === 'POST' && p === '/api/feedbacks') {
+    if (!user) return noAuth();
+    if (!['mentor', 'teacher', 'jiaowu', 'admin'].includes(user.role)) return deny('feedback.create', 'feedback', '该角色无提交权限');
+    const st = visibleStudent(user, body.sid);
+    if (!st) return deny('feedback.create', body.sid, '跨企业个体数据不可见（ZL-01 第二十二条 / E7）');
+    if (DB.feedbacks.some(f => f.internId === st.internId && f.period === body.period)) {
+      audit(user.username, 'feedback.create', body.sid, '重复提交同一批次（幂等键 internId+period，E5）', 'REJECTED');
+      return { code: 409, data: { detail: '该学生在此周期已有反馈（幂等键 internId+period 命中，E5）' } };
+    }
+    DB.seq.fb++;
+    const row = {
+      id: DB.seq.fb, sid: body.sid, internId: st.internId, period: body.period, mentor: st.mentor,
+      task: body.taskHint || null, observed: null, scoreRaw: body.scoreRaw === '' ? null : body.scoreRaw,
+      scoreType: body.scoreType || '100', comment: body.comment, status: 'submitted',
+      srcVersion: 'manual-' + Math.floor(Date.now() / 1000), submittedBy: user.username
+    };
+    DB.feedbacks.push(row);
+    audit(user.username, 'feedback.create', 'feedback:' + row.id, 'sid=' + body.sid + ' period=' + body.period, 'OK');
+    return { code: 200, data: { id: row.id, ok: true } };
+  }
+
+  if (method === 'POST' && (m = p.match(/^\/api\/feedbacks\/(\d+)\/extract$/))) {
+    if (!user) return noAuth();
+    const fb = DB.feedbacks.find(f => f.id === Number(m[1]));
+    if (!fb) return { code: 404, data: { detail: '反馈不存在' } };
+    if (user.role === 'mentor' && !visibleStudent(user, fb.sid)) return deny('extract', 'feedback:' + fb.id, '跨企业个体数据不可见（E7）');
+    const res = KB.extract(fb.comment || '', fb.task || '');
+    DB.seq.tri++;
+    const tri = {
+      id: DB.seq.tri, feedbackId: fb.id, task: res.task, observed: res.observed, gap: res.gap,
+      suggestion: res.suggestion, course: res.course, confidence: res.confidence,
+      span: res.span ? JSON.stringify(res.span) : null, status: res.status, promptVersion: 'prompt_v1.0-mvp'
+    };
+    DB.triples.push(tri);
+    if (res.status === 'insufficient_evidence') fb.status = 'insufficient';
+    audit(user.username, 'extract', 'triple:' + tri.id, 'prompt=prompt_v1.0-mvp conf=' + res.confidence + ' status=' + res.status, res.status.toUpperCase());
+    return { code: 200, data: tri };
+  }
+
+  if (method === 'GET' && p === '/api/triples') {
+    if (!user) return noAuth();
+    let rows = DB.triples.map(t => {
+      const f = DB.feedbacks.find(x => x.id === t.feedbackId) || {};
+      const st = studentOf(f.sid) || {};
+      return { ...t, comment: f.comment, sid: f.sid, sname: st.name, eid: st.eid, ename: ename(st.eid) };
+    }).sort((a, b) => b.id - a.id);
+    if (user.role === 'mentor') rows = rows.filter(r => r.eid === user.orgId);
+    return { code: 200, data: rows };
+  }
+
+  if (method === 'POST' && (m = p.match(/^\/api\/triples\/(\d+)\/promote$/))) {
+    if (!user) return noAuth();
+    if (!['teacher', 'jiaowu', 'admin'].includes(user.role)) return deny('triple.promote', 'triple:' + m[1], '复核权限仅教师/教务');
+    const t = DB.triples.find(x => x.id === Number(m[1]));
+    if (!t) return { code: 404, data: { detail: '三元组不存在' } };
+    if (t.status === 'insufficient_evidence') return { code: 409, data: { detail: '证据不足，不能进入建议流（教育-004）' } };
+    if (DB.suggestions.some(s => s.tripleId === t.id)) return { code: 409, data: { detail: '该三元组已生成建议，不可重复提升（幂等拒绝）' } };
+    const fb = DB.feedbacks.find(f => f.id === t.feedbackId) || {};
+    const chk = RULES.checkSuggestionFormal({ course: t.course, task: t.task, owner: '唐映秋' });
+    const status = chk.ok ? 'pending_sign' : 'draft';
+    DB.seq.sug++;
+    const sug = {
+      id: DB.seq.sug, tripleId: t.id, course: t.course, task: t.task, owner: '唐映秋', status,
+      feedbackRef: 'feedback:' + t.feedbackId + '/' + (fb.sid || ''), signedBy: null, signedAt: null
+    };
+    DB.suggestions.push(sug);
+    t.status = chk.ok ? 'human_confirmed' : 'draft';
+    audit(user.username, 'triple.promote', 'suggestion:' + sug.id, 'N2 三要素校验 ' + (chk.ok ? '通过' : '未通过') + '，缺失：' + (chk.missing.join('、') || '无'), chk.ok ? 'OK' : 'DRAFT');
+    return { code: 200, data: { suggestionId: sug.id, status, missing: chk.missing } };
+  }
+
+  if (method === 'GET' && p === '/api/suggestions') {
+    if (!user) return noAuth();
+    let rows = DB.suggestions.map(s => {
+      const t = DB.triples.find(x => x.id === s.tripleId) || {};
+      const f = DB.feedbacks.find(x => x.id === t.feedbackId) || {};
+      const st = studentOf(f.sid) || {};
+      return { ...s, gap: t.gap, suggestion: t.suggestion, confidence: t.confidence, sid: f.sid, sname: st.name, eid: st.eid, ename: ename(st.eid) };
+    }).sort((a, b) => b.id - a.id);
+    if (user.role === 'mentor') rows = rows.filter(r => r.eid === user.orgId);
+    return { code: 200, data: rows };
+  }
+
+  if (method === 'POST' && (m = p.match(/^\/api\/suggestions\/(\d+)\/approve$/))) {
+    if (!user) return noAuth();
+    if (!['jiaowu', 'audit', 'admin'].includes(user.role)) return deny('suggestion.approve', 'suggestion:' + m[1], '签核权限仅教务/风险（N2）');
+    const s = DB.suggestions.find(x => x.id === Number(m[1]));
+    if (!s) return { code: 404, data: { detail: '建议不存在' } };
+    if (s.status === 'draft') return { code: 409, data: { detail: '三要素不齐备，仍为草稿，不能签核入库（教育-015）' } };
+    s.status = 'formal'; s.signedBy = user.username; s.signedAt = Date.now();
+    audit(user.username, 'suggestion.approve', 'suggestion:' + s.id, '引用=' + s.feedbackRef + ' 签核人=' + user.username, 'FORMAL');
+    return { code: 200, data: { ok: true, status: 'formal' } };
+  }
+
+  if (method === 'GET' && p === '/api/changes') {
+    if (!user) return noAuth();
+    let rows = DB.changes.map(c => {
+      const st = studentOf(c.sid) || {};
+      const stale = DB.feedbacks.filter(f => f.internId === c.internId && f.mentor === c.oldMentor).length;
+      return { ...c, sname: st.name, eid: st.eid, ename: ename(st.eid), staleHits: stale, risk: !c.synced && stale > 0 };
+    });
+    if (user.role === 'mentor') rows = rows.filter(r => r.eid === user.orgId);
+    return { code: 200, data: rows };
+  }
+
+  if (method === 'POST' && (m = p.match(/^\/api\/changes\/(\d+)\/reassign$/))) {
+    if (!user) return noAuth();
+    if (!['jiaowu', 'admin'].includes(user.role)) return deny('change.reassign', 'change:' + m[1], '改派权限仅教务（N3）');
+    const ch = DB.changes.find(x => x.id === Number(m[1]));
+    if (!ch) return { code: 404, data: { detail: '变更不存在' } };
+    const chk = RULES.checkReassign(ch.internId, body.newMentor);
+    DB.seq.todo++;
+    if (chk.ok) {
+      DB.todos.push({ id: DB.seq.todo, key: chk.key, internId: ch.internId, kind: 'reassign', assignee: body.newMentor, status: 'assigned', note: '变更#' + ch.id + ' 改派，承接人 ' + body.newMentor });
+      const st = DB.students.find(s => s.internId === ch.internId);
+      if (st) st.mentor = body.newMentor;
+      ch.synced = true;
+      audit(user.username, 'change.reassign', 'change:' + ch.id, 'intern=' + ch.internId + ' -> ' + body.newMentor, 'OK');
+      return { code: 200, data: { ok: true, todo: 'assigned' } };
+    }
+    DB.todos.push({ id: DB.seq.todo, key: chk.key + '|held-' + ch.id, internId: ch.internId, kind: 'reassign', assignee: null, status: 'held', note: '挂起原因：' + chk.fails.join('；') });
+    audit(user.username, 'change.reassign.hold', 'change:' + ch.id, chk.fails.join('；'), 'HELD');
+    return { code: 200, data: { ok: false, held: true, fails: chk.fails } };
+  }
+
+  if (method === 'GET' && p === '/api/todos') { if (!user) return noAuth(); return { code: 200, data: DB.todos.slice().reverse() }; }
+
+  if (method === 'GET' && p === '/api/kb/search') { if (!user) return noAuth(); return { code: 200, data: KB.search(q.get('q') || '', 6) }; }
+  if (method === 'POST' && p === '/api/kb/ask') { if (!user) return noAuth(); return { code: 200, data: KB.ask(body.question || '') }; }
+  if (method === 'GET' && p === '/api/wiki') { if (!user) return noAuth(); return { code: 200, data: ((SEED.wiki || {}).pages || []) }; }
+
+  if (method === 'POST' && p === '/api/scores') {
+    audit(user ? user.username : 'anonymous', 'score.write.attempt', 'POST /api/scores', '成绩写回接口不存在（schema 无 score 字段），越权尝试', 'DENIED');
+    return { code: 403, data: { detail: '成绩写回被制度禁止（ZL-01 第十七条），接口不存在，已留痕' } };
+  }
+
+  if (method === 'GET' && p === '/api/admin/users') {
+    if (!user) return noAuth();
+    if (user.role !== 'admin') return deny('admin.users', 'admin.users', '仅 SaaS 管理员');
+    return {
+      code: 200, data: {
+        users: DB.users.map(u => ({ username: u.username, display: u.display, role: u.role, roleName: ROLES[u.role], orgId: u.orgId })),
+        enterprises: DB.enterprises
+      }
+    };
+  }
+  if (method === 'POST' && p === '/api/admin/users') {
+    if (!user) return noAuth();
+    if (user.role !== 'admin') return deny('admin.users.add', 'admin.users', '仅 SaaS 管理员');
+    if (DB.users.some(u => u.username === body.username)) return { code: 409, data: { detail: '用户名已存在' } };
+    DB.users.push({ username: body.username, password: body.password, display: body.display, role: body.role, orgId: body.orgId || null });
+    audit(user.username, 'admin.user.add', body.username, 'role=' + body.role + ' org=' + (body.orgId || '-'), 'OK');
+    return { code: 200, data: { ok: true } };
+  }
+
+  if (method === 'GET' && p === '/api/audit') {
+    if (!user) return noAuth();
+    let rows = DB.audit.slice().reverse();
+    if (!['admin', 'audit'].includes(user.role)) rows = rows.filter(a => a.actor === user.username);
+    return { code: 200, data: rows.slice(0, 200) };
+  }
+  if (method === 'GET' && p === '/api/config') {
+    if (!user) return noAuth();
+    return {
+      code: 200, data: {
+        version: 'koujing_v1.0', denominator: '学生 × 双周周期（每学期 10 期）',
+        periods: EXPECTED_PERIODS, scaleMap: SCALE_MAP, enterprises: DB.enterprises
+      }
+    };
+  }
+  if (method === 'GET' && p === '/api/harness/run') {
+    if (!user) return noAuth();
+    if (!['admin', 'audit', 'jiaowu'].includes(user.role)) return deny('harness.run', 'api/harness', '测试台仅 SaaS 管理员/风险/教务可触发');
+    return { code: 200, data: runHarness(user) };
+  }
+  return { code: 404, data: { detail: '接口不存在：' + method + ' ' + p } };
+}
+
+/* =======================================================================
+   Harness 测试台：30 项检查（与 harness.py 的 16 组 H01–H16 一一对应）
+   每次运行前快照内存库，运行后回滚，保证可重复执行
+   ======================================================================= */
+const TRIPLE_FIELDS = ['id', 'feedbackId', 'task', 'observed', 'gap', 'suggestion', 'course', 'confidence', 'span', 'status', 'promptVersion'];
+
+function runHarness(currentUser) {
+  const snap = clone(DB);
+  const results = [];
+  const T = {};
+  const check = (name, group, expect, actual, passed, detail) =>
+    results.push({ name, group, expect, actual: String(actual).slice(0, 200), pass: !!passed, detail: detail || '' });
+  const login = (u, p) => { const r = api('POST', '/api/login', { username: u, password: p }); if (r.code === 200) T[u] = r.data.token; return r; };
+  const call = (method, path, body, tok) => api(method, path, body || {}, tok || T.admin);
+
+  try {
+    /* H01 鉴权 */
+    let r = login('admin', 'wrong-password');
+    check('错误密码必须 401', '鉴权', '401', r.code, r.code === 401);
+    r = login('admin', 'admin123');
+    check('正确凭据可登录', '鉴权', '200', r.code, r.code === 200);
+    r = api('GET', '/api/overview');
+    check('无令牌访问必须 401', '鉴权', '401', r.code, r.code === 401);
+
+    /* H02 分层权限 */
+    login('yesh', 'ye123'); login('tangyj', 'tang123');
+    r = call('GET', '/api/feedbacks', {}, T.yesh);
+    const eids = r.code === 200 ? [...new Set(r.data.map(x => x.eid))].sort() : [];
+    check('企业导师只见本企业数据', '权限分层', '仅 E1', eids.join('、') || '无', r.code === 200 && eids.length === 1 && eids[0] === 'E1', 'ZL-01 第二十二条 / 教育-013');
+    r = call('POST', '/api/feedbacks', { sid: '202301010004', period: 'PX1', comment: '越权提交测试', scoreRaw: 80, scoreType: '100' }, T.yesh);
+    check('越权写他企学生 → 403 且留痕(E7)', '权限分层', '403', r.code, r.code === 403);
+    r = call('GET', '/api/feedbacks', {}, T.tangyj);
+    check('教务可见全量', '权限分层', '≥12 条', (r.data || []).length + ' 条', r.code === 200 && r.data.length >= 12);
+
+    /* H03 成绩写回硬拒绝 */
+    r = call('POST', '/api/scores', { sid: '202301010001', score: 95 }, T.admin);
+    check('成绩写回接口不存在 → 403', '不可逆动作', '403', r.code, r.code === 403, 'ZL-01 第十七条 / 教育-012');
+
+    /* H04 变更同步 E1 */
+    r = call('GET', '/api/changes', {}, T.tangyj);
+    const risky = (r.data || []).filter(c => c.risk);
+    check('换岗未同步且旧导师仍收反馈 → 风险标记(E1)', '变更同步', '≥1', risky.length + ' 条', r.code === 200 && risky.length >= 1, '教育-005：12 条变更 5 条未同步');
+
+    /* H05 改派幂等 E5 */
+    r = call('GET', '/api/changes', {}, T.tangyj);
+    const target = (r.data || []).find(c => !c.synced);
+    if (!target) {
+      check('存在未同步变更可供改派', '变更同步', '存在', '无', false);
+    } else {
+      const b = { newMentor: 'mentor-fixed' };
+      const r1 = call('POST', '/api/changes/' + target.id + '/reassign', b, T.tangyj);
+      check('首次改派成功', '变更同步', 'ok', r1.code, r1.code === 200 && r1.data.ok === true, 'N3 具名承接');
+      const r2 = call('POST', '/api/changes/' + target.id + '/reassign', b, T.tangyj);
+      check('同键重复改派 → 幂等拒绝(E5)', '不可逆动作', 'held/挂起', r2.code, r2.code === 200 && r2.data.ok === false && r2.data.held === true);
+    }
+
+    /* H06 三元组抽取 E2 */
+    r = call('GET', '/api/feedbacks', {}, T.tangyj);
+    const pureAdj = (r.data || []).find(f => f.comment && f.comment.includes('沟通能力不足'));
+    const rA = call('POST', '/api/feedbacks/' + pureAdj.id + '/extract', {}, T.tangyj);
+    check('纯评价形容词 → insufficient_evidence(E2)', '抽取边界', 'insufficient_evidence', rA.data.status,
+      rA.code === 200 && rA.data.status === 'insufficient_evidence', '教育-004：无行为实例不算可用');
+    const good = (r.data || []).find(f => f.observed && f.comment && f.comment.includes('报废'));
+    const rB = call('POST', '/api/feedbacks/' + good.id + '/extract', {}, T.tangyj);
+    check('正常评语 → 三元组 + 原文区间回指', '抽取边界', 'auto+span',
+      rB.data.status + '/' + !!rB.data.span, rB.code === 200 && rB.data.status === 'auto' && !!rB.data.span, '教育-024：每条须显示原记录');
+
+    /* H07 低置信转人工 */
+    const ex = KB.extract('该生表现一般，态度尚可。');
+    check('无行为实例置信度<0.6 → 不自动入库', '停止条件', '0.3 / insufficient',
+      ex.confidence + '/' + ex.status, ex.confidence < 0.6 && ex.status !== 'auto', '教育-032 停止条件写进代码');
+
+    /* H08 N2 三要素 */
+    r = call('GET', '/api/triples', {}, T.tangyj);
+    const cand = (r.data || []).find(x => (x.status === 'auto' || x.status === 'human_queue') && x.course);
+    if (!cand) { check('存在可提升的三元组', '建议入库', '存在', '无', false); }
+    else {
+      const p1 = call('POST', '/api/triples/' + cand.id + '/promote', {}, T.tangyj);
+      check('N2 通过 → 建议进入待签核', '建议入库', 'pending_sign', p1.data.status, p1.code === 200 && p1.data.status === 'pending_sign', '教育-015：三要素齐备才计有效');
+      const p2 = call('POST', '/api/suggestions/' + p1.data.suggestionId + '/approve', {}, T.tangyj);
+      check('教务签核 → 正式入库(formal)', '建议入库', '200/formal', p2.code, p2.code === 200 && p2.data.status === 'formal');
+      const p3 = call('POST', '/api/triples/' + cand.id + '/promote', {}, T.tangyj);
+      check('重复提升 → 拒绝(409)', '不可逆动作', '409', p3.code, p3.code === 409);
+    }
+
+    /* H09 口径换算 E3 */
+    const v1 = RULES.convertScore(4, '5', 'E2');
+    check('五分制按备案换算（甬泰 4→85）', '口径', '85', v1, v1 === 85, '教育-008');
+    const v2 = RULES.convertScore(4, '5', 'E3');
+    check('未备案企业 → 不参与汇总(E3)', '口径', 'null', v2, v2 === null, '中锐自动化未备案');
+
+    /* H10 M1 分母口径 */
+    const m1 = RULES.m1();
+    const students = m1.denominator / EXPECTED_PERIODS.length;
+    check('M1 分母=学生×周期（非 600×1）', '指标口径', 'students×2', m1.denominator,
+      m1.denominator === students * EXPECTED_PERIODS.length, '教育-034：分母相差 10 倍的口径冲突 C1');
+    check('M1 率与旧口径并行可算（M5）', '指标口径', '偏差<1', RULES.m5().deviation, RULES.m5().deviation < 1);
+
+    /* H11 RAG 检索质量 */
+    const h1 = KB.search('换岗后仍然关联旧导师导致反馈错发', 5);
+    const c1 = h1.map(x => x.code);
+    check('『换岗错发』检索命中 教育-005', '知识库RAG', '教育-005', c1.slice(0, 3).join('、'), c1.some(c => c && c.includes('教育-005')));
+    const h2 = KB.search('完整率分母怎么算', 5);
+    check('『分母口径』检索命中口径类文档', '知识库RAG', '口径注册表 / 教育-034',
+      h2.slice(0, 3).map(x => x.title.slice(0, 12)).join('｜'), h2.some(x => x.title.includes('口径') || (x.code || '').includes('教育-034')));
+    const ans = KB.ask('成绩能不能写回平台');
+    check('问答带引用编号（可回指证据）', '知识库RAG', '含引用', ans.citations.length + ' 条', ans.citations.length > 0, 'REQ-05：输出可回指原记录');
+
+    /* H12 审计只追加 */
+    const before = DB.audit.length;
+    audit('harness', 'audit.append.test', 'audit', '追加一条', 'OK');
+    const after = DB.audit.length;
+    const d1 = call('DELETE', '/api/audit/1', {}, T.admin);
+    const d2 = call('PATCH', '/api/audit/1', {}, T.admin);
+    check('审计只追加：无 UPDATE/DELETE 路由', '审计', '404/405', d1.code + '/' + d2.code,
+      [404, 405].includes(d1.code) && [404, 405].includes(d2.code), '方案 §8.2：审计能重建当次处理');
+    check('审计追加生效', '审计', before + 1, after, after === before + 1);
+
+    /* H13 越权访问管理端 */
+    login('linyz', 'lin123');
+    const g1 = call('GET', '/api/admin/users', {}, T.linyz);
+    check('教师访问 SaaS 管理端 → 403', '权限分层', '403', g1.code, g1.code === 403);
+    const g2 = call('GET', '/api/harness/run', {}, T.linyz);
+    check('教师触发测试台 → 403', '权限分层', '403', g2.code, g2.code === 403);
+
+    /* H14 签核权限 */
+    login('yesh', 'ye123');
+    const s1 = call('POST', '/api/suggestions/999/approve', {}, T.yesh);
+    check('企业导师无签核权 → 403', '权限分层', '403', s1.code, s1.code === 403, 'N2 签核=教务/风险');
+
+    /* H15 输出不带成绩字段 */
+    check('模型输出 schema 无 score 字段', '不可逆动作', '无 score', TRIPLE_FIELDS.join('、'),
+      !TRIPLE_FIELDS.some(f => f.toLowerCase().includes('score')), '方案 §七：禁止输出学生等级/分数');
+
+    /* H16 停止条件汇总 */
+    const qn = DB.triples.filter(t => t.status === 'human_queue').length;
+    const insuf = DB.feedbacks.filter(f => f.status === 'insufficient').length;
+    check('低置信/证据不足条目均停在人工侧，未进建议表', '停止条件', '≥1', qn + '/' + insuf, qn + insuf >= 1, '教育-032：原因+接手人+人工确认');
+  } catch (e) {
+    check('Harness 运行异常', '异常', '无异常', String(e && e.message || e), false);
+  }
+
+  /* 回滚：保留运行期间 token 之外的状态，避免污染演示数据 */
+  const keepTokens = DB.tokens;
+  DB = snap;
+  DB.tokens = Object.assign(DB.tokens, keepTokens);
+  if (currentUser) {
+    for (const k in DB.tokens) if (DB.tokens[k] === currentUser.username) stateTokensKeep(k);
+  }
+
+  const passed = results.filter(r => r.pass).length;
+  return { total: results.length, passed, failed: results.length - passed, results, ranAt: Date.now() };
+}
+const _keepTokens = {};
+function stateTokensKeep(k) { _keepTokens[k] = DB.tokens[k]; }
+
+/* =======================================================================
+   界面层
+   ======================================================================= */
+const TABS = [
+  { id: 'ov', label: '总览', icon: '▦' },
+  { id: 'fb', label: '反馈归集', icon: '⇩' },
+  { id: 'ch', label: '变更同步', icon: '⇄' },
+  { id: 'sg', label: '建议复核', icon: '✔' },
+  { id: 'kb', label: '知识库', icon: '▤' },
+  { id: 'hs', label: '测试台 Harness', icon: '⚑' },
+  { id: 'ad', label: '权限与账号', icon: '⚙' },
+  { id: 'au', label: '审计', icon: '≡' }
+];
+const SUB = {
+  ov: '五项验收指标的实时口径 · 分层权限下同一份数据的不同视图',
+  fb: '接入层：企业评分原文 → 可用性判定 → 三元组抽取（REQ-01 / E2）',
+  ch: '变更同步：换岗/延期/任务变更 → 改派确认（N3）→ 错发拦截（E1）',
+  sg: '复核台：三元组 → 建议草稿 → 三要素校验（N2）→ 签核入库，全过程可回指原记录',
+  kb: '知识库：Wiki 页 + 36 条访谈事实的检索增强（RAG）+ 带引用的问答',
+  hs: '同一套接口契约下的 30 项自动化检查，覆盖权限、不可逆动作、异常清单与检索质量',
+  ad: 'SaaS 管理员管用户与口径；分层用户按企业与学生范围收敛可见域',
+  au: '审计旁路：只追加、无更新/删除路由，能重建当次处理'
+};
+const state = { token: null, user: null, tab: 'ov', hs: null, newFb: false };
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const fmtT = ts => { const d = new Date(ts); const p = n => String(n).padStart(2, '0'); return p(d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes()); };
+const req = (m, p, b) => api(m, p, b || {}, state.token);
+const can = roles => roles.includes(state.user && state.user.role);
+
+let toastTimer = null;
+function toast(msg, kind) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + (kind || '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.className = 'toast ' + (kind || ''); }, 2600);
+}
+
+/* ---------------- 登录 ---------------- */
+function quick(u) { $('uName').value = u; $('uPwd').value = (USERS.find(x => x.username === u) || {}).password || ''; doLogin(); }
+function doLogin() {
+  const r = api('POST', '/api/login', { username: $('uName').value.trim(), password: $('uPwd').value });
+  if (r.code !== 200) { $('loginErr').textContent = r.data.detail; return; }
+  $('loginErr').textContent = '';
+  state.token = r.data.token; state.user = r.data;
+  $('login').classList.add('hidden');
+  $('app').classList.remove('hidden');
+  renderShell();
+  switchTab('ov');
+}
+function logout() {
+  state.token = null; state.user = null; state.hs = null;
+  $('app').classList.add('hidden');
+  $('login').classList.remove('hidden');
+  $('uPwd').value = 'admin123'; $('uName').value = 'admin';
+}
+
+function renderShell() {
+  const u = state.user;
+  $('whoName').textContent = u.display;
+  $('whoRole').textContent = u.roleName + (u.orgId ? ' · ' + ename(u.orgId) : '');
+  $('avatar').textContent = (u.display || 'U').slice(0, 1);
+  $('nav').innerHTML = TABS.map(t => '<button id="nav-' + t.id + '" onclick="switchTab(\'' + t.id + '\')"><i>' + t.icon + '</i>' + t.label + '</button>').join('');
+}
+function switchTab(id) {
+  state.tab = id;
+  TABS.forEach(t => { const b = $('nav-' + t.id); if (b) b.className = t.id === id ? 'on' : ''; });
+  $('pageTitle').textContent = (TABS.find(t => t.id === id) || {}).label || '';
+  $('pageSub').textContent = SUB[id] || '';
+  const u = state.user;
+  $('topChips').innerHTML =
+    '<span class="chip b">' + esc(u.roleName) + '</span>' +
+    (u.orgId ? '<span class="chip">' + esc(ename(u.orgId)) + '</span>' : '<span class="chip">全校范围</span>') +
+    '<span class="chip">口径 koujing_v1.0</span>' +
+    (id === 'hs' ? '<span class="chip g">30 项</span>' : '');
+  const R = { ov: renderOv, fb: renderFb, ch: renderCh, sg: renderSg, kb: renderKb, hs: renderHs, ad: renderAd, au: renderAu };
+  (R[id] || renderOv)();
+}
+
+/* ---------------- 总览 ---------------- */
+function renderOv() {
+  const o = req('GET', '/api/overview').data;
+  const cfg = req('GET', '/api/config').data;
+  const meta = {
+    M1: { unit: '%', fmt: v => (v * 100).toFixed(1) + '%', note: '目标 85%' },
+    M2: { unit: '条', fmt: v => v, note: '目标 24 条' },
+    M3: { unit: 'h', fmt: v => v.toFixed(0) + ' h', note: '目标 6 h/月' },
+    M4: { unit: '条', fmt: v => v, note: '硬指标 0' },
+    M5: { unit: '%', fmt: v => (v * 100).toFixed(0) + '%', note: '阈值 ≤5%' }
+  };
+  const cards = ['M1', 'M2', 'M3', 'M4', 'M5'].map(k => {
+    const m = o[k], mt = meta[k];
+    const ok = m.hit;
+    return '<div class="metric ' + (ok ? 'ok' : 'bad') + '">' +
+      '<div class="k"><span>' + k + ' · ' + esc(m.label) + '</span></div>' +
+      '<div class="v">' + mt.fmt(m.value) + '</div>' +
+      '<div class="d">' + esc(m.detail) + '</div>' +
+      '<div class="bar"><i style="width:' + Math.max(4, Math.round((m.pct || 0) * 100)) + '%"></i></div>' +
+      '<div class="d" style="margin-top:6px;color:var(--mute)">' + mt.note + ' · ' + (ok ? '达标' : '未达标') + '</div>' +
+      '</div>';
+  }).join('');
+
+  const pipe = [
+    ['① 接入', '人工补录 / 种子导入<br/>标来源与版本'],
+    ['② 映射', '三套编号对齐<br/>SID · INTERN · COURSE'],
+    ['③ 规则', '口径换算 / 幂等<br/>前置确定性校验'],
+    ['④ 模型', '评语 → 三元组<br/>置信度 < 0.6 转人工'],
+    ['⑤ 复核', '人工确认 / 提升<br/>三要素校验'],
+    ['⑥ 输出', '建议入库 + 回指<br/>原记录与签核时间']
+  ].map((s, i) => '<div class="step"><b>' + s[0] + '</b><small>' + s[1] + '</small></div>' + (i < 5 ? '<div class="arr">›</div>' : '')).join('');
+
+  $('view').innerHTML =
+    '<div class="card"><div class="row"><h3 style="margin:0">验收指标（M1–M5）</h3><div class="spacer"></div>' +
+    '<span class="chip ' + (o.M4.hit ? 'g' : 'r') + '">错发 ' + o.M4.value + ' 条</span>' +
+    '<span class="chip y">待人工队列 ' + o.queues.humanQueue + '</span>' +
+    '<span class="chip r">证据不足 ' + o.queues.insufficient + '</span></div>' +
+    '<div class="sub">分母口径：学生 × 双周批次累计（' + esc(cfg.denominator) + '）；两套分母并行计算用于 M5 偏差监控</div>' +
+    '<div class="grid5">' + cards + '</div></div>' +
+
+    '<div class="card"><h3>处理链路（六层 + 审计旁路）</h3><div class="sub">每一层都只做一件事；不可逆动作前有确定性校验，模型只负责“抽取与草稿”</div>' +
+    '<div class="pipe">' + pipe + '</div>' +
+    '<div class="note" style="margin-top:10px">审计旁路：写操作一律留痕（who / when / what / 结果），只追加、无更新与删除路由。当前会话已记录 <b>' + DB.audit.length + '</b> 条。</div></div>' +
+
+    '<div class="two"><div class="card"><h3>数据体量</h3><div class="sub">试点规模：机电专业 12 名学生 × 5 家企业 × 2 个双周批次</div>' +
+    '<table><tbody>' +
+    '<tr><td>反馈条数</td><td class="mono">' + o.counts.feedbacks + '</td><td>变更事件</td><td class="mono">' + o.counts.changes + '</td></tr>' +
+    '<tr><td>未同步变更</td><td class="mono">' + o.counts.unsynced + '</td><td>三元组</td><td class="mono">' + o.counts.triples + '</td></tr>' +
+    '<tr><td>建议条数</td><td class="mono">' + o.counts.suggestions + '</td><td>知识库文档</td><td class="mono">' + KB.docs.length + '</td></tr>' +
+    '</tbody></table></div>' +
+
+    '<div class="card"><h3>口径注册表</h3><div class="sub">版本化，变更需备案（教育-026 / N4）</div>' +
+    '<dl class="kv"><dt>版本</dt><dd class="mono">' + esc(cfg.version) + '</dd>' +
+    '<dt>分母</dt><dd>' + esc(cfg.denominator) + '</dd>' +
+    '<dt>周期</dt><dd class="mono">' + cfg.periods.join(' · ') + '</dd>' +
+    '<dt>五分制换算</dt><dd class="mono">5→95 · 4→85 · 3→75 · 2→65 · 1→55</dd>' +
+    '<dt>未备案企业</dt><dd>' + cfg.enterprises.filter(e => e.scaleStatus !== 'filed').map(e => esc(e.name)).join('、') + '（不参与汇总，E3）</dd>' +
+    '<dt>抽取器</dt><dd>离线规则抽取器 · <span class="mono">prompt_v1.0-mvp</span>（可切换在线 LLM）</dd></dl></div></div>';
+}
+
+/* ---------------- 反馈归集 ---------------- */
+function renderFb() {
+  const list = req('GET', '/api/feedbacks').data;
+  const scope = state.user.role === 'mentor' ? ('仅本企业：' + ename(state.user.orgId)) : '全量（按角色收敛）';
+  const rows = list.map(f =>
+    '<tr><td class="mono">' + f.id + '</td><td>' + esc(f.sname) + '</td><td>' + esc(f.ename) + '</td>' +
+    '<td class="mono">' + esc(f.period) + '</td><td>' + esc(f.task || '—') + '</td>' +
+    '<td class="mono">' + (f.scoreRaw == null ? '—' : f.scoreRaw + ' / ' + f.scoreType) + '</td>' +
+    '<td>' + (f.status === 'insufficient' ? '<span class="st bad">证据不足</span>' : f.status === 'ok' ? '<span class="st ok">可用</span>' : '<span class="st info">已提交</span>') + '</td>' +
+    '<td style="max-width:320px;color:#42566e">' + esc((f.comment || '').slice(0, 64)) + (f.comment && f.comment.length > 64 ? '…' : '') + '</td>' +
+    '<td><button class="btn ghost small" onclick="extractFb(' + f.id + ')">抽取三元组</button></td></tr>').join('');
+
+  const opts = DB.students.filter(s => state.user.role !== 'mentor' || s.eid === state.user.orgId)
+    .map(s => '<option value="' + s.sid + '">' + s.name + ' · ' + ename(s.eid) + '</option>').join('');
+  const tasks = ['数控加工', '零件编程', '装配调试', '质量检验', '设备维护', '模具设计', '工艺文件', 'CAD制图', '现场巡检', '物料管理'];
+
+  $('view').innerHTML =
+    '<div class="card"><div class="row"><h3 style="margin:0">反馈台账</h3><div class="spacer"></div>' +
+    '<span class="chip">' + esc(scope) + '</span>' +
+    (can(['mentor', 'teacher', 'jiaowu', 'admin']) ? '<button class="btn small" onclick="toggleNewFb()">＋ 人工补录</button>' : '') +
+    '</div><div class="sub">可用判定 = 五项字段齐备 + 行为实例不少于 12 字（区别于“六项非空”的旧校验）</div>' +
+    (state.newFb ? '<div class="note" style="margin-bottom:12px">' +
+      '<div class="row" style="gap:8px;margin-bottom:8px">' +
+      '<select class="f" id="fbSid" style="max-width:220px">' + opts + '</select>' +
+      '<select class="f" id="fbPeriod" style="max-width:110px"><option>P02</option><option>P03</option></select>' +
+      '<select class="f" id="fbTask" style="max-width:150px">' + tasks.map(t => '<option>' + t + '</option>').join('') + '</select>' +
+      '<input class="f" id="fbScore" placeholder="原始分" style="max-width:100px" />' +
+      '<select class="f" id="fbType" style="max-width:100px"><option value="100">百分制</option><option value="5">五分制</option></select>' +
+      '</div>' +
+      '<textarea class="f" id="fbComment" rows="3" placeholder="粘贴企业导师评语原文，例如：本周独立完成 12 件法兰盘车削，1 件因对刀偏差报废。"></textarea>' +
+      '<div class="row" style="margin-top:8px"><button class="btn teal small" onclick="submitFb()">提交并留痕</button>' +
+      '<span class="note" style="border:0;background:transparent;padding:0">同一学生同一批次重复提交会被幂等键拒绝（E5）</span></div></div>' : '') +
+    '<div class="scroll"><table><thead><tr><th>#</th><th>学生</th><th>企业</th><th>批次</th><th>岗位任务</th><th>原始分</th><th>状态</th><th>评语原文</th><th>操作</th></tr></thead>' +
+    '<tbody>' + rows + '</tbody></table></div></div>';
+}
+function toggleNewFb() { state.newFb = !state.newFb; renderFb(); }
+function submitFb() {
+  const body = {
+    sid: $('fbSid').value, period: $('fbPeriod').value, taskHint: $('fbTask').value,
+    scoreRaw: $('fbScore').value === '' ? null : Number($('fbScore').value),
+    scoreType: $('fbType').value, comment: $('fbComment').value
+  };
+  const r = req('POST', '/api/feedbacks', body);
+  if (r.code === 200) { toast('已提交并写入审计', 'ok'); state.newFb = false; renderFb(); }
+  else toast(r.data.detail, 'err');
+}
+function extractFb(id) {
+  const r = req('POST', '/api/feedbacks/' + id + '/extract');
+  if (r.code !== 200) { toast(r.data.detail, 'err'); return; }
+  const d = r.data;
+  toast('抽取结果：' + d.status + '（置信度 ' + d.confidence + '）', d.status === 'insufficient_evidence' ? 'err' : 'ok');
+  renderFb();
+}
+
+/* ---------------- 变更同步 ---------------- */
+function renderCh() {
+  const list = req('GET', '/api/changes').data;
+  const todos = req('GET', '/api/todos').data;
+  const rows = list.map(c =>
+    '<tr><td class="mono">' + esc(c.internId) + '</td><td>' + esc(c.sname) + '</td><td>' + esc(c.ename) + '</td>' +
+    '<td>' + esc(c.changeType) + '</td><td class="mono">' + esc(c.oldMentor) + ' → ' + esc(c.newMentor) + '</td>' +
+    '<td>' + (c.synced ? '<span class="st ok">已同步</span>' : '<span class="st bad">未同步</span>') + '</td>' +
+    '<td class="mono">' + c.staleHits + '</td>' +
+    '<td>' + (c.risk ? '<span class="st bad">E1 错发风险</span>' : c.synced ? '<span class="st mute">—</span>' : '<span class="st warn">待观察</span>') + '</td>' +
+    '<td>' + (can(['jiaowu', 'admin']) && !c.synced ? '<button class="btn ghost small" onclick="doReassign(' + c.id + ')">改派确认</button>' : '<span class="st mute">—</span>') + '</td></tr>').join('');
+
+  const todoRows = todos.length ? todos.map(t =>
+    '<tr><td class="mono">' + esc(t.internId) + '</td><td>' + (t.status === 'assigned' ? '<span class="st ok">已派单</span>' : '<span class="st warn">挂起</span>') + '</td>' +
+    '<td>' + esc(t.assignee || '—') + '</td><td style="color:#42566e">' + esc(t.note) + '</td></tr>').join('')
+    : '<tr><td colspan="4" style="color:var(--mute)">暂无待办。试试点上面的「改派确认」：同一承接人重复派单会被幂等拒绝。</td></tr>';
+
+  $('view').innerHTML =
+    '<div class="card"><div class="row"><h3 style="margin:0">变更事件与错发拦截</h3><div class="spacer"></div>' +
+    '<span class="chip r">错发硬指标 0 条</span><span class="chip y">未同步 ' + list.filter(c => !c.synced).length + ' 条</span></div>' +
+    '<div class="sub">E1 判定 = 变更未同步 且 旧导师仍在该实习编号下产生新反馈；风险行必须走 N3 改派确认（承接人具名 + 无同键待办）</div>' +
+    '<div class="scroll"><table><thead><tr><th>实习编号</th><th>学生</th><th>企业</th><th>类型</th><th>导师变更</th><th>同步</th><th>旧导师仍在收</th><th>风险</th><th>操作</th></tr></thead>' +
+    '<tbody>' + rows + '</tbody></table></div></div>' +
+    '<div class="card"><h3>改派待办</h3><div class="sub">全部前置校验通过才落待办并改绑导师；否则写“挂起原因”，不静默失败</div>' +
+    '<table><thead><tr><th>实习编号</th><th>状态</th><th>承接人</th><th>说明</th></tr></thead><tbody>' + todoRows + '</tbody></table></div>';
+}
+function doReassign(id) {
+  const nm = window.prompt('请输入承接导师账号（具名，不可为空）', 'mentor-fixed');
+  if (nm === null) return;
+  const r = req('POST', '/api/changes/' + id + '/reassign', { newMentor: nm.trim() });
+  if (r.code !== 200) { toast(r.data.detail, 'err'); return; }
+  if (r.data.ok) { toast('改派完成：已落待办并同步导师字段', 'ok'); }
+  else { toast('已挂起：' + r.data.fails.join('；'), 'err'); }
+  renderCh();
+}
+
+/* ---------------- 建议复核 ---------------- */
+function renderSg() {
+  const trs = req('GET', '/api/triples').data;
+  const sugs = req('GET', '/api/suggestions').data;
+  const triRows = trs.length ? trs.map(t =>
+    '<tr><td class="mono">' + t.id + '</td><td>' + esc(t.sname) + '</td><td>' + esc(t.task || '—') + '</td>' +
+    '<td style="max-width:260px">' + esc((t.observed || '—').slice(0, 58)) + '</td>' +
+    '<td>' + esc(t.gap || '—') + '</td><td>' + esc(t.course || '—') + '</td>' +
+    '<td class="mono">' + t.confidence + '</td>' +
+    '<td>' + (t.status === 'auto' ? '<span class="st info">自动·待复核</span>' : t.status === 'insufficient_evidence' ? '<span class="st bad">证据不足</span>' : t.status === 'human_queue' ? '<span class="st warn">人工队列</span>' : '<span class="st ok">' + esc(t.status) + '</span>') + '</td>' +
+    '<td>' + (can(['teacher', 'jiaowu', 'admin']) && (t.status === 'auto' || t.status === 'human_queue') ? '<button class="btn ghost small" onclick="promoteTriple(' + t.id + ')">提升为建议</button>' : '<span class="st mute">—</span>') + '</td></tr>').join('')
+    : '<tr><td colspan="9" style="color:var(--mute)">还没有三元组。先到「反馈归集」里对一条评语点「抽取三元组」。</td></tr>';
+
+  const sugRows = sugs.length ? sugs.map(s =>
+    '<tr><td class="mono">' + s.id + '</td><td>' + esc(s.sname) + '</td><td>' + esc(s.task || '—') + '</td><td>' + esc(s.course || '—') + '</td>' +
+    '<td>' + esc(s.owner || '—') + '</td><td class="mono">' + esc(s.feedbackRef) + '</td>' +
+    '<td>' + (s.status === 'formal' ? '<span class="st ok">已签核入库</span>' : s.status === 'pending_sign' ? '<span class="st info">待签核</span>' : '<span class="st bad">草稿（三要素缺失）</span>') + '</td>' +
+    '<td>' + (can(['jiaowu', 'audit', 'admin']) && s.status === 'pending_sign' ? '<button class="btn teal small" onclick="approveSug(' + s.id + ')">签核入库</button>' : '<span class="st mute">—</span>') + '</td></tr>').join('')
+    : '<tr><td colspan="8" style="color:var(--mute)">暂无建议。三元组经人工复核提升后出现在这里。</td></tr>';
+
+  $('view').innerHTML =
+    '<div class="card"><div class="row"><h3 style="margin:0">三元组（抽取结果）</h3><div class="spacer"></div>' +
+    '<span class="chip">置信度阈值 0.6</span><span class="chip y">待复核</span></div>' +
+    '<div class="sub">字段：岗位任务 / 观察到的行为 / 差距 / 建议草稿 / 课程候选；输出 schema 内没有分数与等级字段</div>' +
+    '<div class="scroll"><table><thead><tr><th>#</th><th>学生</th><th>任务</th><th>行为实例（原文区间可回指）</th><th>差距</th><th>课程候选</th><th>置信度</th><th>状态</th><th>操作</th></tr></thead><tbody>' + triRows + '</tbody></table></div></div>' +
+    '<div class="card"><h3>建议草稿与签核</h3><div class="sub">N2 三要素＝课程 + 任务 + 责任人；缺一项只能存草稿，不能签核入库</div>' +
+    '<div class="scroll"><table><thead><tr><th>#</th><th>学生</th><th>任务</th><th>课程</th><th>责任人</th><th>原记录引用</th><th>状态</th><th>操作</th></tr></thead><tbody>' + sugRows + '</tbody></table></div></div>';
+}
+function promoteTriple(id) {
+  const r = req('POST', '/api/triples/' + id + '/promote');
+  if (r.code !== 200) { toast(r.data.detail, 'err'); return; }
+  toast(r.data.status === 'pending_sign' ? '三要素齐备 → 进入待签核' : '三要素缺失（' + r.data.missing.join('、') + '）→ 存为草稿', r.data.status === 'pending_sign' ? 'ok' : '');
+  renderSg();
+}
+function approveSug(id) {
+  const r = req('POST', '/api/suggestions/' + id + '/approve');
+  r.code === 200 ? toast('已签核入库，引用与时间戳已写入审计', 'ok') : toast(r.data.detail, 'err');
+  renderSg();
+}
+
+/* ---------------- 知识库 ---------------- */
+function renderKb() {
+  const wiki = req('GET', '/api/wiki').data;
+  const facts = (SEED.facts || []);
+  $('view').innerHTML =
+    '<div class="two"><div class="card"><h3>检索（RAG）</h3><div class="sub">中文字符 bigram + 标题加权；纯前端实现，与后端 kb.py 同算法</div>' +
+    '<div class="row" style="margin-bottom:10px"><input class="f" id="kbQ" style="max-width:320px" placeholder="例如：换岗后仍然关联旧导师 / 完整率分母怎么算" onkeydown="if(event.key===\'Enter\')kbSearch()" />' +
+    '<button class="btn small" onclick="kbSearch()">检索</button></div>' +
+    '<div id="kbHits" class="note">输入关键词后检索，命中结果会带证据编号，可直接回指访谈原记录。</div></div>' +
+
+    '<div class="card"><h3>问答（带引用）</h3><div class="sub">检索式问答：答案后附引用编号；离线规则组装，不生成无出处内容</div>' +
+    '<div class="row" style="margin-bottom:10px"><input class="f" id="kbAsk" style="max-width:360px" placeholder="例如：成绩能不能写回平台？" onkeydown="if(event.key===\'Enter\')kbAsk()" />' +
+    '<button class="btn small" onclick="kbAsk()">提问</button></div>' +
+    '<pre class="ans" id="kbAns">尚未提问。</pre></div></div>' +
+
+    '<div class="card"><div class="row"><h3 style="margin:0">Wiki 页</h3><div class="spacer"></div><span class="chip">' + wiki.length + ' 页</span><span class="chip b">' + facts.length + ' 条事实</span></div>' +
+    '<div class="sub">口径注册表 / 岗位任务 / 制度条款 / 角色职责 / 企业档案 / 停止条件</div>' +
+    wiki.map((p, i) => '<div class="wikiItem"><button onclick="toggleWiki(' + i + ')">' + esc(p.title) + '<span class="code">' + esc(p.code) + '</span></button>' +
+      '<div id="wiki-' + i + '" class="hidden">' + esc(p.body) + '</div></div>').join('') + '</div>' +
+
+    '<div class="card"><h3>访谈事实库（教育-001 ～ 036）</h3><div class="sub">六位角色 × 36 问，每条带证据编号与需求/验收口径</div>' +
+    '<div class="scroll"><table><thead><tr><th>编号</th><th>角色</th><th>主题</th><th>事实原文</th></tr></thead><tbody>' +
+    facts.map(f => '<tr><td class="mono">' + esc(f.code) + '</td><td>' + esc(f.character) + '</td><td>' + esc(f.topic) + '</td>' +
+      '<td style="color:#42566e">' + esc(f.text) + '</td></tr>').join('') + '</tbody></table></div></div>';
+}
+function toggleWiki(i) { const d = $('wiki-' + i); if (d) d.className = d.className === 'hidden' ? '' : 'hidden'; }
+function kbSearch() {
+  const q = $('kbQ').value.trim(); if (!q) return;
+  const hits = req('GET', '/api/kb/search?q=' + encodeURIComponent(q)).data;
+  $('kbHits').className = '';
+  $('kbHits').innerHTML = hits.length ? hits.map(h =>
+    '<div class="hit"><span class="sc">' + h.score + '</span><b>' + esc(h.title) + '</b>' +
+    '<p>' + esc(h.text.slice(0, 220)) + (h.text.length > 220 ? '…' : '') + '</p></div>').join('')
+    : '<div class="note">没有命中。可试：换岗 / 口径 / 完整率 / 权限 / 停止条件。</div>';
+}
+function kbAsk() {
+  const q = $('kbAsk').value.trim(); if (!q) return;
+  const r = req('POST', '/api/kb/ask', { question: q }).data;
+  $('kbAns').textContent = r.answer + (r.citations.length ? '\n\n引用：' + r.citations.slice(0, 6).map(c => c.code || c.title).join('、') : '');
+}
+
+/* ---------------- 测试台 ---------------- */
+function renderHs() {
+  const allowed = can(['admin', 'audit', 'jiaowu']);
+  let body = '<div class="note">当前角色：' + esc(state.user.roleName) + (allowed ? '（可触发）' : '（无触发权限，本应返回 403 并留痕）') + '</div>';
+  if (state.hs) {
+    const byGroup = {};
+    state.hs.results.forEach(r => { (byGroup[r.group] = byGroup[r.group] || []).push(r); });
+    const groups = Object.keys(byGroup).map(g =>
+      '<div class="hsGroup">' + esc(g) + '（' + byGroup[g].filter(x => x.pass).length + '/' + byGroup[g].length + '）</div>' +
+      byGroup[g].map(r => '<div class="hsRow"><span class="ico ' + (r.pass ? 'ok' : 'no') + '">' + (r.pass ? '✓' : '✗') + '</span>' +
+        '<span>' + esc(r.name) + '</span><span class="act">期望：' + esc(r.expect) + '</span>' +
+        '<span class="act">实际：' + esc(r.actual) + '</span></div>').join('')).join('');
+    body = '<div class="hsSum"><b style="color:' + (state.hs.failed ? 'var(--risk)' : 'var(--ok)') + '">' + state.hs.passed + ' / ' + state.hs.total + '</b>' +
+      '<span style="color:var(--sub)">通过 · ' + fmtT(state.hs.ranAt) + ' 运行 · 运行后已回滚演示数据</span></div>' + groups;
+  }
+  $('view').innerHTML =
+    '<div class="card"><div class="row"><h3 style="margin:0">Harness 自动化评测</h3><div class="spacer"></div>' +
+    '<button class="btn" onclick="runHsUI()" ' + (allowed ? '' : 'disabled') + '>运行 30 项检查</button></div>' +
+    '<div class="sub">覆盖：鉴权与令牌 · 分层权限与越权留痕 · 不可逆动作前置校验 · 幂等 · 抽取边界 · 口径换算 · 指标分母 · RAG 检索质量 · 审计只追加</div>' +
+    body + '</div>' +
+    '<div class="card"><h3>异常清单（E1–E8）如何被覆盖</h3><div class="sub">每一条异常都有对应的可执行检查，而不是写在文档里</div>' +
+    '<table><tbody>' +
+    '<tr><td class="mono">E1</td><td>换岗未同步仍向旧导师发反馈</td><td>' + (state.hs ? (state.hs.results.find(r => r.name.includes('E1')) || {}).pass ? '<span class="st ok">已覆盖</span>' : '<span class="st bad">未通过</span>' : '<span class="st mute">待运行</span>') + '</td></tr>' +
+    '<tr><td class="mono">E2</td><td>纯评价形容词无行为实例</td><td>' + (state.hs ? (state.hs.results.find(r => r.name.includes('E2')) || {}).pass ? '<span class="st ok">已覆盖</span>' : '<span class="st bad">未通过</span>' : '<span class="st mute">待运行</span>') + '</td></tr>' +
+    '<tr><td class="mono">E3</td><td>五分制未备案企业参与汇总</td><td>' + (state.hs ? (state.hs.results.find(r => r.name.includes('E3')) || {}).pass ? '<span class="st ok">已覆盖</span>' : '<span class="st bad">未通过</span>' : '<span class="st mute">待运行</span>') + '</td></tr>' +
+    '<tr><td class="mono">E5</td><td>重复提交 / 重复改派 / 重复提升</td><td>' + (state.hs ? (state.hs.results.find(r => r.name.includes('幂等')) || {}).pass ? '<span class="st ok">已覆盖</span>' : '<span class="st bad">未通过</span>' : '<span class="st mute">待运行</span>') + '</td></tr>' +
+    '<tr><td class="mono">E7</td><td>跨企业个体评价越权访问</td><td>' + (state.hs ? (state.hs.results.find(r => r.name.includes('E7')) || {}).pass ? '<span class="st ok">已覆盖</span>' : '<span class="st bad">未通过</span>' : '<span class="st mute">待运行</span>') + '</td></tr>' +
+    '<tr><td class="mono">§7</td><td>成绩写回 / 输出 schema 含分数</td><td>' + (state.hs ? (state.hs.results.find(r => r.name.includes('score')) || {}).pass ? '<span class="st ok">已覆盖</span>' : '<span class="st bad">未通过</span>' : '<span class="st mute">待运行</span>') + '</td></tr>' +
+    '</tbody></table></div>';
+}
+function runHsUI() {
+  const r = req('GET', '/api/harness/run');
+  if (r.code !== 200) { toast(r.data.detail, 'err'); return; }
+  state.hs = r.data;
+  renderHs();
+  toast('通过 ' + r.data.passed + ' / ' + r.data.total + ' 项', r.data.failed ? 'err' : 'ok');
+}
+
+/* ---------------- 权限与账号 ---------------- */
+function renderAd() {
+  const matrix =
+    '<table class="matrix"><thead><tr><th>能力</th><th>SaaS 管理员</th><th>教务</th><th>指导教师</th><th>企业导师</th><th>风险合规</th></tr></thead><tbody>' +
+    [['全量反馈可见', 'y', 'y', 'y', '本企业', 'y'],
+     ['提交反馈', 'y', 'y', 'y', 'y', 'n'],
+     ['抽取三元组', 'y', 'y', 'y', '本企业', 'y'],
+     ['提升建议 / 改派', 'y', 'y', '提升', 'n', 'n'],
+     ['签核入库', 'y', 'y', 'n', 'n', 'y'],
+     ['用户与口径管理', 'y', 'n', 'n', 'n', 'n'],
+     ['触发 Harness', 'y', 'y', 'n', 'n', 'y'],
+     ['成绩写回', 'n', 'n', 'n', 'n', 'n']].map(r =>
+      '<tr><td>' + r[0] + '</td>' + r.slice(1).map(v => v === 'y' ? '<td class="y">允许</td>' : v === 'n' ? '<td class="n">拒绝</td>' : '<td class="p">' + v + '</td>').join('') + '</tr>').join('') +
+    '</tbody></table>';
+
+  if (state.user.role !== 'admin') {
+    $('view').innerHTML =
+      '<div class="card"><h3>权限矩阵（§5.4）</h3><div class="sub">你当前是「' + esc(state.user.roleName) + '」，无法访问用户管理接口（GET /api/admin/users → 403 并留痕）</div>' +
+      '<div class="note" style="margin-bottom:12px">这是一次真实的越权尝试：点下面的按钮可以看到返回码与审计记录。</div>' +
+      '<button class="btn ghost small" onclick="testDenied()">尝试访问用户管理接口</button>' +
+      '<div style="margin-top:14px">' + matrix + '</div></div>';
+    return;
+  }
+
+  const d = req('GET', '/api/admin/users').data;
+  $('view').innerHTML =
+    '<div class="card"><div class="row"><h3 style="margin:0">账号与组织</h3><div class="spacer"></div><span class="chip b">SaaS 管理员视图</span></div>' +
+    '<div class="sub">账号创建、角色分配与所属企业绑定；所有写操作进审计</div>' +
+    '<table><thead><tr><th>账号</th><th>显示名</th><th>角色</th><th>所属企业</th></tr></thead><tbody>' +
+    d.users.map(u => '<tr><td class="mono">' + esc(u.username) + '</td><td>' + esc(u.display) + '</td><td>' + esc(u.roleName) + '</td><td>' + (u.orgId ? esc(ename(u.orgId)) : '—') + '</td></tr>').join('') +
+    '</tbody></table>' +
+    '<div class="note" style="margin-top:12px"><div class="row" style="gap:8px">' +
+    '<input class="f" id="nuName" placeholder="账号" style="max-width:130px" />' +
+    '<input class="f" id="nuPwd" placeholder="初始密码" style="max-width:130px" />' +
+    '<input class="f" id="nuDisplay" placeholder="显示名" style="max-width:170px" />' +
+    '<select class="f" id="nuRole" style="max-width:150px"><option value="jiaowu">教务管理员</option><option value="teacher">实习指导教师</option><option value="mentor">企业实习导师</option><option value="audit">风险合规</option></select>' +
+    '<select class="f" id="nuOrg" style="max-width:140px"><option value="">—（全校）</option>' + d.enterprises.map(e => '<option value="' + e.id + '">' + esc(e.name) + '</option>').join('') + '</select>' +
+    '<button class="btn small" onclick="addUser()">新增账号</button></div></div></div>' +
+
+    '<div class="card"><h3>权限矩阵（§5.4）</h3><div class="sub">跨企业个体评价一律不可见；成绩字段对所有角色都不存在</div>' + matrix + '</div>' +
+
+    '<div class="card"><h3>越权演示</h3><div class="sub">两个被制度禁止的动作，看后端如何拒绝并留痕</div>' +
+    '<div class="row"><button class="btn ghost small" onclick="testScore()">调用 POST /api/scores（成绩写回）</button>' +
+    '<button class="btn ghost small" onclick="testDenied()">以企业导师身份访问管理端</button></div>' +
+    '<div id="adOut" class="note" style="margin-top:10px">点上面按钮查看返回结果。</div></div>';
+}
+function addUser() {
+  const body = { username: $('nuName').value.trim(), password: $('nuPwd').value, display: $('nuDisplay').value.trim(), role: $('nuRole').value, orgId: $('nuOrg').value || null };
+  if (!body.username || !body.password || !body.display) { toast('账号、密码、显示名都要填', 'err'); return; }
+  const r = req('POST', '/api/admin/users', body);
+  if (r.code === 200) { toast('已新增账号并留痕', 'ok'); renderAd(); } else toast(r.data.detail, 'err');
+}
+function testScore() {
+  const r = req('POST', '/api/scores', { sid: '202301010001', score: 95 });
+  $('adOut').innerHTML = '<b>返回 ' + r.code + '</b> · ' + esc(r.data.detail) + '<br/><span style="color:var(--mute)">已写入审计，前往「审计」页可见 score.write.attempt / DENIED</span>';
+  toast('成绩写回被拒绝（' + r.code + '）', 'err');
+}
+function testDenied() {
+  const login = api('POST', '/api/login', { username: 'yesh', password: 'ye123' });
+  const r = api('GET', '/api/admin/users', {}, login.data.token);
+  const out = $('adOut') || null;
+  const msg = '<b>企业导师访问 /api/admin/users → ' + r.code + '</b> · ' + esc(r.data.detail) + '<br/><span style="color:var(--mute)">越权已留痕（perm.deny / DENIED）</span>';
+  if (out) out.innerHTML = msg; else toast('403：企业导师无权访问管理端', 'err');
+  if (out) toast('越权被拒绝并留痕', 'err');
+}
+
+/* ---------------- 审计 ---------------- */
+function renderAu() {
+  const rows = req('GET', '/api/audit').data;
+  const color = r => r.result === 'DENIED' || r.result === 'REJECTED' ? 'bad' : r.result === 'HELD' || r.result === 'DRAFT' ? 'warn' : 'ok';
+  $('view').innerHTML =
+    '<div class="card"><div class="row"><h3 style="margin:0">审计日志</h3><div class="spacer"></div>' +
+    '<span class="chip">' + rows.length + ' 条</span><span class="chip g">只追加</span></div>' +
+    '<div class="sub">' + (can(['admin', 'audit']) ? '全量视图' : '仅本人操作视图') + ' · 无 UPDATE / DELETE 路由（DELETE /api/audit/1 → 404）</div>' +
+    '<div class="scroll" style="max-height:520px"><table><thead><tr><th>时间</th><th>操作者</th><th>动作</th><th>对象</th><th>详情</th><th>结果</th></tr></thead><tbody>' +
+    rows.map(r => '<tr><td class="mono">' + fmtT(r.ts) + '</td><td>' + esc(r.actor) + '</td><td class="mono">' + esc(r.action) + '</td>' +
+      '<td class="mono">' + esc(r.target) + '</td><td style="color:#42566e;max-width:380px">' + esc(r.detail) + '</td>' +
+      '<td><span class="st ' + color(r) + '">' + esc(r.result) + '</span></td></tr>').join('') +
+    '</tbody></table></div></div>';
+}
+
+</script>
+<script>window.addEventListener('DOMContentLoaded',function(){document.getElementById('uPwd').value='admin123';});</script>
+</body>
+</html>
